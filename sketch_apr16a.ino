@@ -4,11 +4,13 @@
 #include <Adafruit_SSD1306.h>
 #include <MQ135.h>
 #include <BH1750.h>
+#include <limits.h>
 
 // Definicje pinow
 #define DHT_DATA_PIN 2        // Pin danych DHT22
+#define PIR_PIN 3             // Pin czujnika ruchu HC-SR501
 #define MQ135_A0_PIN A2       // Pin analogowy A2 dla MQ135
-#define BUZZER_PIN 12        // Pozostawiam A12 jak w oryginalnym kodzie
+#define BUZZER_PIN 12         // Pin dla buzzera KY-012
 
 // Parametry wyswietlacza OLED
 #define SCREEN_WIDTH 128
@@ -39,6 +41,54 @@ unsigned long lastBuzzerToggle = 0;
 #define LIGHT_THRESHOLD 100        // Prog aktywacji buzzera dla swiatla (lux)
 #define AIR_QUALITY_THRESHOLD 60   // Prog aktywacji buzzera dla jakosci powietrza (%, ponizej tej wartosci)
 
+// Zmienne dla czujnika ruchu
+volatile bool motionInterrupted = false;
+bool motionDetected = false;
+unsigned long lastMotionTime = 0;
+unsigned long lastDisplayUpdateTime = 0;
+const unsigned long debounceTime = 500;     // Czas debouncingu w milisekundach
+const unsigned long displayUpdateInterval = 1000; // Aktualizacja wyświetlacza co 1 sekundę
+
+// Funkcja obliczająca różnicę czasu z uwzględnieniem przepełnienia licznika millis()
+unsigned long getTimeDifference(unsigned long currentTime, unsigned long previousTime) {
+  return (currentTime >= previousTime) ? (currentTime - previousTime) : (ULONG_MAX - previousTime + currentTime + 1);
+}
+
+// Procedura obsługi przerwania dla czujnika ruchu
+void motionISR() {
+  unsigned long currentTime = millis();
+  if (getTimeDifference(currentTime, lastMotionTime) > debounceTime) {
+    motionInterrupted = true;
+    motionDetected = true;
+    lastMotionTime = currentTime;
+    
+    // Zaznaczamy, że buzzer powinien być aktywny
+    buzzerActive = true;
+  }
+}
+
+// Funkcja odczytu czujnika ruchu
+void readMotion() {
+  if (!motionInterrupted) {
+    bool newMotion = digitalRead(PIR_PIN) == HIGH;
+    if (newMotion != motionDetected) {
+      motionDetected = newMotion;
+      if (motionDetected) {
+        lastMotionTime = millis();
+        // Zaznaczamy, że buzzer powinien być aktywny
+        buzzerActive = true;
+      }
+    }
+  }
+  
+  // Resetowanie flagi wykrycia ruchu po upływie określonego czasu
+  unsigned long currentTime = millis();
+  if (motionDetected && getTimeDifference(currentTime, lastMotionTime) > 5000) {
+    motionDetected = false;
+    Serial.println(F("Ruch ustał"));
+  }
+}
+
 // Funkcja do wyswietlania ASCII Art
 void showASCIIArt() {
   display.clearDisplay();
@@ -52,8 +102,6 @@ void showASCIIArt() {
   display.getTextBounds(text1, 0, 0, &x1, &y1, &w1, &h1);
   display.setCursor((SCREEN_WIDTH - w1) / 2, (SCREEN_HEIGHT - 16) / 2);
   display.println(text1);
-  
-  // Odstęp jednej linii
   
   // Wycentrowanie tekstu "PROJEKT SMART HOUSE" horyzontalnie
   String text2 = "PROJEKT SMART HOUSE";
@@ -85,25 +133,31 @@ void initSensors() {
   display.setCursor(0, 0);
   display.println(F("Inicjalizacja systemu..."));
   
-  // Inicjalizacja DHT22 - 25%
-  drawProgressBar(10, 30, 108, 10, 25);
+  // Inicjalizacja DHT22 - 20%
+  drawProgressBar(10, 30, 108, 10, 20);
   dht.begin();
   Serial.println(F("Czujnik DHT22 zainicjalizowany"));
   delay(500);
   
-  // Inicjalizacja MQ135 - 50%
-  drawProgressBar(10, 30, 108, 10, 50);
+  // Inicjalizacja MQ135 - 40%
+  drawProgressBar(10, 30, 108, 10, 40);
   pinMode(MQ135_A0_PIN, INPUT);
   Serial.println(F("Czujnik MQ135 zainicjalizowany"));
   delay(500);
   
-  // Inicjalizacja BH1750 - 75%
-  drawProgressBar(10, 30, 108, 10, 75);
+  // Inicjalizacja BH1750 - 60%
+  drawProgressBar(10, 30, 108, 10, 60);
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
     Serial.println(F("Czujnik BH1750 zainicjalizowany pomyslnie"));
   } else {
     Serial.println(F("Blad inicjalizacji czujnika BH1750!"));
   }
+  delay(500);
+  
+  // Inicjalizacja PIR - 80%
+  drawProgressBar(10, 30, 108, 10, 80);
+  pinMode(PIR_PIN, INPUT);
+  Serial.println(F("Czujnik ruchu PIR zainicjalizowany"));
   delay(500);
   
   // Inicjalizacja buzzera - 100%
@@ -141,7 +195,7 @@ void handleBuzzer() {
   // Sprawdz warunki aktywacji buzzera
   bool lightTrigger = (lightLevel > LIGHT_THRESHOLD);
   bool airTrigger = (airQualityPercent < AIR_QUALITY_THRESHOLD);  // Poniżej 60%
-  bool shouldActivate = lightTrigger || airTrigger;
+  bool shouldActivate = lightTrigger || airTrigger || motionDetected;
   
   // Debug - print detailed status
   Serial.print(F("Buzzer check - Light: "));
@@ -152,18 +206,10 @@ void handleBuzzer() {
   Serial.print(airQualityPercent);
   Serial.print(F("% (Threshold: <"));
   Serial.print(AIR_QUALITY_THRESHOLD);
-  Serial.print(F("%), Should activate: "));
+  Serial.print(F("%), Motion: "));
+  Serial.print(motionDetected ? F("YES") : F("NO"));
+  Serial.print(F(", Should activate: "));
   Serial.println(shouldActivate ? F("YES") : F("NO"));
-  
-  // Warunek 1: Natezenie swiatla powyzej progu
-  if (lightTrigger) {
-    Serial.println(F("Alarm: Zbyt wysokie natezenie swiatla"));
-  }
-  
-  // Warunek 2: Zla jakosc powietrza (poniżej progu)
-  if (airTrigger) {
-    Serial.println(F("Alarm: Zla jakosc powietrza"));
-  }
   
   // For KY-012 active buzzer - create a beeping pattern
   unsigned long currentMillis = millis();
@@ -236,9 +282,12 @@ void readSensors() {
   if (lux >= 0 && lux < 65535) {
     lightLevel = lux;
   }
+  
+  // Odczyt czujnika ruchu
+  readMotion();
 }
 
-// POPRAWIONA funkcja - Przelicz jakosc powietrza na procenty
+// Funkcja - Przelicz jakosc powietrza na procenty
 int calculateAirQualityPercent() {
   // Ustalamy nowy zakres dla pełnej skali 0-100%
   float maxPPM = 100.0;  // Maksymalne zanieczyszczenie dla 100%
@@ -263,19 +312,19 @@ int calculateLightPercent() {
   return lightPercent;
 }
 
-// Funkcja do aktualizacji wyswietlacza - teraz kazdy pomiar w osobnej linii
+// Funkcja do aktualizacji wyswietlacza - wszystkie pomiary i status alarmu
 void updateDisplay() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   
-  // Temperatura w osobnej linii
+  // Temperatura
   display.setCursor(0, 0);
   display.print(F("Temperatura: "));
   display.print(temperature, 1);
   display.println(F(" C"));
   
-  // Wilgotnosc w osobnej linii
+  // Wilgotnosc
   display.setCursor(0, 10);
   display.print(F("Wilgotnosc: "));
   display.print(humidity, 1);
@@ -295,26 +344,37 @@ void updateDisplay() {
   display.print(lightPercent);
   display.println(F(" %"));
   
-  // Status alarmu
+  // Status ruchu
   display.setCursor(0, 40);
-  display.print(F("Status: "));
+  display.print(F("Ruch: "));
+  display.println(motionDetected ? F("TAK") : F("NIE"));
+  
+  // Status alarmu
+  display.setCursor(0, 50);
   if (buzzerActive) {
-    display.println(F("ALARM!"));
+    display.println(F("UWAGA: WYKRYTO ALARM!"));
     
-    // Przyczyny alarmu
+    // Przyczyny alarmu - wyświetlane są w konsoli, bo ekran OLED jest już prawie pełny
+    Serial.println(F("Przyczyny alarmu:"));
     if (lightLevel > LIGHT_THRESHOLD) {
-      display.setCursor(0, 50);
-      display.println(F("- Wysokie natezenie swiatla"));
+      Serial.println(F("- Wysokie natezenie swiatla"));
     }
     if (airQualityPercent < AIR_QUALITY_THRESHOLD) {
-      display.setCursor(0, 50 + (lightLevel > LIGHT_THRESHOLD ? 10 : 0));
-      display.println(F("- Zla jakosc powietrza"));
+      Serial.println(F("- Zla jakosc powietrza"));
+    }
+    if (motionDetected) {
+      Serial.println(F("- Wykryto ruch"));
     }
   } else {
-    display.println(F("OK"));
+    display.println(F("Status: OK"));
   }
   
   display.display();
+}
+
+// Funkcja resetująca flagę przerwania
+void resetMotionInterrupt() {
+  motionInterrupted = false;
 }
 
 void setup() {
@@ -333,6 +393,28 @@ void setup() {
   // Inicjalizacja wszystkich czujnikow z paskiem postepu
   initSensors();
   
+  Serial.println(F("Stabilizacja czujnika ruchu (30 sekund)..."));
+  
+  // Komunikat na wyświetlaczu o stabilizacji
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println(F("Stabilizacja"));
+  display.setCursor(0, 10);
+  display.println(F("czujnika ruchu"));
+  display.setCursor(0, 30);
+  display.println(F("Prosze czekac..."));
+  display.display();
+  
+  delay(10000);  // Skrócony czas na ustabilizowanie czujnika PIR (można dostosować)
+  
+  // Konfiguracja przerwania dla czujnika ruchu
+  attachInterrupt(digitalPinToInterrupt(PIR_PIN), motionISR, RISING);
+  
+  // Inicjalizacja zmiennych czasowych
+  lastMotionTime = millis();
+  lastDisplayUpdateTime = millis();
+  
   Serial.println(F("System wieloczujnikowy gotowy!"));
 }
 
@@ -340,11 +422,21 @@ void loop() {
   // Odczyt danych ze wszystkich czujnikow
   readSensors();
   
+  // Sprawdzanie stanu ruchu
+  if (motionInterrupted) {
+    Serial.println(F("Wykryto ruch (przerwanie)"));
+    resetMotionInterrupt();
+  }
+  
   // Kontrola buzzera
   handleBuzzer();
   
   // Aktualizacja wyswietlacza
-  updateDisplay();
+  unsigned long currentTime = millis();
+  if (getTimeDifference(currentTime, lastDisplayUpdateTime) > displayUpdateInterval) {
+    updateDisplay();
+    lastDisplayUpdateTime = currentTime;
+  }
   
   // Wyswietl dane w konsoli
   Serial.print(F("Temperatura: "));
@@ -355,9 +447,11 @@ void loop() {
   Serial.print(calculateAirQualityPercent());
   Serial.print(F(" %, Swiatlo: "));
   Serial.print(calculateLightPercent());
-  Serial.print(F(" %, Buzzer: "));
+  Serial.print(F(" %, Ruch: "));
+  Serial.print(motionDetected ? "TAK" : "NIE");
+  Serial.print(F(", Buzzer: "));
   Serial.println(buzzerActive ? "ON" : "OFF");
   
-  // Odczytuj dane co 1 sekunde
-  delay(500);  // Reduced to 1 second for more responsive buzzer control
+  // Opóźnienie dla stabilności systemu
+  delay(200);  // Zmniejszone dla lepszej responsywności
 }
