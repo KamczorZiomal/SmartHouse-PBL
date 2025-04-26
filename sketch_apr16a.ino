@@ -6,7 +6,7 @@
 #include <BH1750.h>
 #include <limits.h>
 #include <Servo.h>       // Dodana biblioteka do obsługi serwo SG90
-#include <Stepper.h>     // Dodana biblioteka do obsługi silnika krokowego 28BYJ-48 
+#include <Stepper.h>     // Dodana biblioteka do obsługi silnika krokowego 28BYJ-48  
 
 // Definicje pinow
 #define DHT_DATA_PIN 2        // Pin danych DHT22
