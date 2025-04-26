@@ -5,12 +5,20 @@
 #include <MQ135.h>
 #include <BH1750.h>
 #include <limits.h>
+#include <Servo.h>       // Dodana biblioteka do obsługi serwo SG90
+#include <Stepper.h>     // Dodana biblioteka do obsługi silnika krokowego 28BYJ-48
 
 // Definicje pinow
 #define DHT_DATA_PIN 2        // Pin danych DHT22
 #define PIR_PIN 3             // Pin czujnika ruchu HC-SR501
 #define MQ135_A0_PIN A2       // Pin analogowy A2 dla MQ135
-#define BUZZER_PIN 12         // Pin dla buzzera KY-012
+#define BUZZER_PIN 53         // Pin dla buzzera KY-012
+#define SERVO_PIN 9           // Pin dla serwa SG90
+// Piny dla silnika krokowego 28BYJ-48 - poprawione zgodnie z rzeczywistymi połączeniami
+#define IN1 30
+#define IN2 31
+#define IN3 32
+#define IN4 33
 
 // Parametry wyswietlacza OLED
 #define SCREEN_WIDTH 128
@@ -26,6 +34,12 @@ DHT dht(DHT_DATA_PIN, DHT22);       // Czujnik temperatury i wilgotnosci
 MQ135 gasSensor(MQ135_A0_PIN);      // Czujnik zanieczyszczen powietrza
 BH1750 lightMeter;                  // Czujnik natezenia swiatla
 
+// Inicjalizacja serwa i silnika krokowego
+Servo sg90;                          // Serwo SG90
+// Silnik krokowy 28BYJ-48 ma 2048 kroków na pełny obrót (z przekładnią)
+const int STEPS_PER_REV = 2048;
+Stepper stepper(STEPS_PER_REV, IN1, IN2, IN3, IN4);
+
 // Definicje zmiennych globalnych
 float temperature = 0.0;
 float humidity = 0.0;
@@ -36,10 +50,17 @@ bool mqCalibrated = false;
 bool buzzerActive = false;
 unsigned long lastBuzzerToggle = 0;
 
+// Flagi dla serwa i silnika krokowego
+bool servoActivated = false;
+bool stepperActivated = false;
+unsigned long lastServoTime = 0;
+unsigned long lastStepperTime = 0;
+const unsigned long servoResetTime = 1000;     // Czas powrotu serwa do pozycji wyjściowej
+
 // Stale i progi
 #define MAX_ERROR_COUNT 5          // Maksymalna liczba bledow przed ostrzezeniem
 #define LIGHT_THRESHOLD 100        // Prog aktywacji buzzera dla swiatla (lux)
-#define AIR_QUALITY_THRESHOLD 60   // Prog aktywacji buzzera dla jakosci powietrza (%, ponizej tej wartosci)
+#define AIR_QUALITY_THRESHOLD 20   // Prog aktywacji buzzera dla jakosci powietrza (%, ponizej tej wartosci)
 
 // Zmienne dla czujnika ruchu
 volatile bool motionInterrupted = false;
@@ -48,6 +69,7 @@ unsigned long lastMotionTime = 0;
 unsigned long lastDisplayUpdateTime = 0;
 const unsigned long debounceTime = 500;     // Czas debouncingu w milisekundach
 const unsigned long displayUpdateInterval = 1000; // Aktualizacja wyświetlacza co 1 sekundę
+const unsigned long motionResetTime = 3000; // Czas resetowania stanu ruchu (3 sekundy)
 
 // Funkcja obliczająca różnicę czasu z uwzględnieniem przepełnienia licznika millis()
 unsigned long getTimeDifference(unsigned long currentTime, unsigned long previousTime) {
@@ -57,35 +79,102 @@ unsigned long getTimeDifference(unsigned long currentTime, unsigned long previou
 // Procedura obsługi przerwania dla czujnika ruchu
 void motionISR() {
   unsigned long currentTime = millis();
-  if (getTimeDifference(currentTime, lastMotionTime) > debounceTime) {
+  // Sprawdź czy minął czas debounce i czy pin faktycznie jest w stanie wysokim
+  if (getTimeDifference(currentTime, lastMotionTime) > debounceTime && digitalRead(PIR_PIN) == HIGH) {
     motionInterrupted = true;
     motionDetected = true;
     lastMotionTime = currentTime;
     
-    // Zaznaczamy, że buzzer powinien być aktywny
+    // Zaznaczamy, że buzzer powinien być aktywny, ale tylko jeśli naprawdę wykryliśmy ruch
     buzzerActive = true;
+    // Aktywujemy serwomechanizm i silnik krokowy
+    servoActivated = true;
+    stepperActivated = true;
+    lastServoTime = currentTime;
+    lastStepperTime = currentTime;
+    Serial.println(F("Wykryto ruch przez ISR - PIN jest HIGH"));
+  }
+}
+
+// Funkcja do obsługi serwa SG90
+void handleServo() {
+  if (servoActivated) {
+    unsigned long currentTime = millis();
+    
+    // Obracamy serwo o 90 stopni
+    sg90.write(90);
+    Serial.println(F("Serwo obrócone o 90 stopni"));
+    
+    // Resetujemy flagę, żeby nie obracać serwa ponownie
+    servoActivated = false;
+    
+    // Po upływie czasu servoResetTime, serwo wróci do pozycji początkowej
+    delay(servoResetTime);
+    sg90.write(0);
+    Serial.println(F("Serwo powróciło do pozycji początkowej"));
+  }
+}
+
+// Funkcja do obsługi silnika krokowego 28BYJ-48
+void handleStepper() {
+  if (stepperActivated) {
+    Serial.println(F("Rozpoczynanie sekwencji silnika krokowego"));
+    
+    // 3 pełne obroty zgodnie z ruchem wskazówek zegara
+    for (int i = 0; i < 3; i++) {
+      Serial.print(F("Obrót zgodny z ruchem wskazówek #"));
+      Serial.println(i + 1);
+      stepper.step(STEPS_PER_REV);
+    }
+    
+    // 3 pełne obroty przeciwnie do ruchu wskazówek zegara
+    for (int i = 0; i < 3; i++) {
+      Serial.print(F("Obrót przeciwny do ruchu wskazówek #"));
+      Serial.println(i + 1);
+      stepper.step(-STEPS_PER_REV);
+    }
+    
+    // Resetujemy flagę, żeby nie obracać silnika ponownie
+    stepperActivated = false;
+    Serial.println(F("Zakończono sekwencję silnika krokowego"));
   }
 }
 
 // Funkcja odczytu czujnika ruchu
 void readMotion() {
+  // Aktualizuj stan czujnika ruchu tylko jeśli nie było przerwania
   if (!motionInterrupted) {
-    bool newMotion = digitalRead(PIR_PIN) == HIGH;
-    if (newMotion != motionDetected) {
-      motionDetected = newMotion;
-      if (motionDetected) {
-        lastMotionTime = millis();
-        // Zaznaczamy, że buzzer powinien być aktywny
-        buzzerActive = true;
+    bool currentPinState = digitalRead(PIR_PIN) == HIGH;
+    
+    // Tylko gdy stan się zmienił
+    if (currentPinState != motionDetected) {
+      unsigned long currentTime = millis();
+      
+      // Dodatkowe sprawdzenie debounce przy zmianie stanu
+      if (getTimeDifference(currentTime, lastMotionTime) > debounceTime) {
+        motionDetected = currentPinState;
+        lastMotionTime = currentTime;
+        
+        if (motionDetected) {
+          Serial.println(F("Ruch wykryty w readMotion()"));
+          buzzerActive = true;
+          // Aktywujemy serwomechanizm i silnik krokowy gdy wykryto ruch
+          servoActivated = true;
+          stepperActivated = true;
+          lastServoTime = currentTime;
+          lastStepperTime = currentTime;
+        } else {
+          Serial.println(F("Ruch ustał w readMotion()"));
+        }
       }
     }
   }
   
-  // Resetowanie flagi wykrycia ruchu po upływie określonego czasu
+  // Resetowanie flagi wykrycia ruchu po krótszym czasie (3 sekundy zamiast 5)
   unsigned long currentTime = millis();
-  if (motionDetected && getTimeDifference(currentTime, lastMotionTime) > 5000) {
+  if (motionDetected && getTimeDifference(currentTime, lastMotionTime) > motionResetTime) {
     motionDetected = false;
-    Serial.println(F("Ruch ustał"));
+    Serial.println(F("Automatyczny reset wykrycia ruchu po 3 sekundach"));
   }
 }
 
@@ -133,20 +222,20 @@ void initSensors() {
   display.setCursor(0, 0);
   display.println(F("Inicjalizacja systemu..."));
   
-  // Inicjalizacja DHT22 - 20%
-  drawProgressBar(10, 30, 108, 10, 20);
+  // Inicjalizacja DHT22 - 15%
+  drawProgressBar(10, 30, 108, 10, 15);
   dht.begin();
   Serial.println(F("Czujnik DHT22 zainicjalizowany"));
   delay(500);
   
-  // Inicjalizacja MQ135 - 40%
-  drawProgressBar(10, 30, 108, 10, 40);
+  // Inicjalizacja MQ135 - 30%
+  drawProgressBar(10, 30, 108, 10, 30);
   pinMode(MQ135_A0_PIN, INPUT);
   Serial.println(F("Czujnik MQ135 zainicjalizowany"));
   delay(500);
   
-  // Inicjalizacja BH1750 - 60%
-  drawProgressBar(10, 30, 108, 10, 60);
+  // Inicjalizacja BH1750 - 45%
+  drawProgressBar(10, 30, 108, 10, 45);
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
     Serial.println(F("Czujnik BH1750 zainicjalizowany pomyslnie"));
   } else {
@@ -154,10 +243,23 @@ void initSensors() {
   }
   delay(500);
   
-  // Inicjalizacja PIR - 80%
-  drawProgressBar(10, 30, 108, 10, 80);
+  // Inicjalizacja PIR - 60%
+  drawProgressBar(10, 30, 108, 10, 60);
   pinMode(PIR_PIN, INPUT);
   Serial.println(F("Czujnik ruchu PIR zainicjalizowany"));
+  delay(500);
+  
+  // Inicjalizacja serwo SG90 - 75%
+  drawProgressBar(10, 30, 108, 10, 75);
+  sg90.attach(SERVO_PIN);
+  sg90.write(0);  // Ustaw serwo w pozycji początkowej
+  Serial.println(F("Serwo SG90 zainicjalizowane"));
+  delay(500);
+  
+  // Inicjalizacja silnika krokowego - 90%
+  drawProgressBar(10, 30, 108, 10, 90);
+  stepper.setSpeed(10);  // RPM (obroty na minutę)
+  Serial.println(F("Silnik krokowy 28BYJ-48 zainicjalizowany"));
   delay(500);
   
   // Inicjalizacja buzzera - 100%
@@ -194,8 +296,12 @@ void handleBuzzer() {
   
   // Sprawdz warunki aktywacji buzzera
   bool lightTrigger = (lightLevel > LIGHT_THRESHOLD);
-  bool airTrigger = (airQualityPercent < AIR_QUALITY_THRESHOLD);  // Poniżej 60%
-  bool shouldActivate = lightTrigger || airTrigger || motionDetected;
+  bool airTrigger = (airQualityPercent < AIR_QUALITY_THRESHOLD);  // Poniżej progu
+  
+  // Dodano: Sprawdzanie czy ruch jest naprawdę wykryty (dodatkowa weryfikacja)
+  bool motionTrigger = motionDetected && (digitalRead(PIR_PIN) == HIGH);
+  
+  bool shouldActivate = lightTrigger || airTrigger || motionTrigger;
   
   // Debug - print detailed status
   Serial.print(F("Buzzer check - Light: "));
@@ -207,7 +313,7 @@ void handleBuzzer() {
   Serial.print(F("% (Threshold: <"));
   Serial.print(AIR_QUALITY_THRESHOLD);
   Serial.print(F("%), Motion: "));
-  Serial.print(motionDetected ? F("YES") : F("NO"));
+  Serial.print(motionTrigger ? F("YES") : F("NO"));
   Serial.print(F(", Should activate: "));
   Serial.println(shouldActivate ? F("YES") : F("NO"));
   
@@ -347,7 +453,9 @@ void updateDisplay() {
   // Status ruchu
   display.setCursor(0, 40);
   display.print(F("Ruch: "));
-  display.println(motionDetected ? F("TAK") : F("NIE"));
+  // Dodatkowa weryfikacja - raportujemy tylko gdy pin jest fizycznie wysoki
+  bool motionConfirmed = motionDetected && (digitalRead(PIR_PIN) == HIGH);
+  display.println(motionConfirmed ? F("TAK") : F("NIE"));
   
   // Status alarmu
   display.setCursor(0, 50);
@@ -362,7 +470,7 @@ void updateDisplay() {
     if (airQualityPercent < AIR_QUALITY_THRESHOLD) {
       Serial.println(F("- Zla jakosc powietrza"));
     }
-    if (motionDetected) {
+    if (motionConfirmed) {
       Serial.println(F("- Wykryto ruch"));
     }
   } else {
@@ -381,6 +489,12 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("Inicjalizacja systemu wieloczujnikowego..."));
   
+  // Konfiguracja pinów dla silnika krokowego
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  
   // Inicjalizacja wyswietlacza OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("Blad inicjalizacji wyswietlacza SSD1306"));
@@ -393,7 +507,7 @@ void setup() {
   // Inicjalizacja wszystkich czujnikow z paskiem postepu
   initSensors();
   
-  Serial.println(F("Stabilizacja czujnika ruchu (30 sekund)..."));
+  Serial.println(F("Stabilizacja czujnika ruchu (60 sekund)..."));
   
   // Komunikat na wyświetlaczu o stabilizacji
   display.clearDisplay();
@@ -406,7 +520,8 @@ void setup() {
   display.println(F("Prosze czekac..."));
   display.display();
   
-  delay(10000);  // Skrócony czas na ustabilizowanie czujnika PIR (można dostosować)
+  // Zwiększ czas stabilizacji
+  delay(60000);  // 60 sekund na stabilizację czujnika PIR
   
   // Konfiguracja przerwania dla czujnika ruchu
   attachInterrupt(digitalPinToInterrupt(PIR_PIN), motionISR, RISING);
@@ -426,6 +541,16 @@ void loop() {
   if (motionInterrupted) {
     Serial.println(F("Wykryto ruch (przerwanie)"));
     resetMotionInterrupt();
+  }
+  
+  // Obsługa serwa SG90 po wykryciu ruchu
+  if (servoActivated) {
+    handleServo();
+  }
+  
+  // Obsługa silnika krokowego 28BYJ-48 po wykryciu ruchu
+  if (stepperActivated) {
+    handleStepper();
   }
   
   // Kontrola buzzera
@@ -448,10 +573,14 @@ void loop() {
   Serial.print(F(" %, Swiatlo: "));
   Serial.print(calculateLightPercent());
   Serial.print(F(" %, Ruch: "));
-  Serial.print(motionDetected ? "TAK" : "NIE");
+  
+  // Dodatkowa weryfikacja - raportujemy tylko gdy pin jest fizycznie wysoki
+  bool motionConfirmed = motionDetected && (digitalRead(PIR_PIN) == HIGH);
+  Serial.print(motionConfirmed ? "TAK" : "NIE");
+  
   Serial.print(F(", Buzzer: "));
   Serial.println(buzzerActive ? "ON" : "OFF");
   
   // Opóźnienie dla stabilności systemu
-  delay(200);  // Zmniejszone dla lepszej responsywności
+  delay(1000);  // Zmniejszone dla lepszej responsywności
 }
