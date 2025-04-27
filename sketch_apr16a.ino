@@ -84,10 +84,10 @@ void readMotion() {
       
       // Wyświetl odpowiedni komunikat w zależności od wykrycia ruchu
       if (motionDetected) {
-        Serial.println(F("Ruch: WYKRYTO"));
+        // Serial.println(F("Ruch: WYKRYTO"));
         buzzerTesting = true;  // Symulacja sprawdzania buzzera, bez faktycznego włączania
       } else {
-        Serial.println(F("Ruch: BRAK"));
+        // Serial.println(F("Ruch: BRAK"));
         buzzerTesting = false;
       }
     }
@@ -99,7 +99,7 @@ void readMotion() {
   if (motionDetected && getTimeDifference(currentTime, lastMotionTime) > motionResetTime) {
     motionDetected = false;
     buzzerTesting = false;
-    Serial.println(F("Ruch: BRAK (automatyczny reset po czasie)"));
+    // Serial.println(F("Ruch: BRAK (automatyczny reset po czasie)"));
   }
 }
 
@@ -155,48 +155,48 @@ void initSensors() {
   // Inicjalizacja DHT22 - 15% postępu
   drawProgressBar(10, 30, 108, 10, 15);
   dht.begin();
-  Serial.println(F("Czujnik DHT22 zainicjalizowany - mierzy temperaturę i wilgotność"));
+  // Serial.println(F("Czujnik DHT22 zainicjalizowany - mierzy temperaturę i wilgotność"));
   delay(500);
   
   // Inicjalizacja MQ135 - 30% postępu
   drawProgressBar(10, 30, 108, 10, 30);
   pinMode(MQ135_A0_PIN, INPUT);
-  Serial.println(F("Czujnik MQ135 zainicjalizowany - mierzy jakość powietrza"));
+  // Serial.println(F("Czujnik MQ135 zainicjalizowany - mierzy jakość powietrza"));
   delay(500);
   
   // Inicjalizacja BH1750 - 45% postępu
   drawProgressBar(10, 30, 108, 10, 45);
   if (lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE)) {
-    Serial.println(F("Czujnik BH1750 zainicjalizowany pomyślnie - mierzy natężenie światła"));
+    // Serial.println(F("Czujnik BH1750 zainicjalizowany pomyślnie - mierzy natężenie światła"));
   } else {
-    Serial.println(F("Błąd inicjalizacji czujnika BH1750! Sprawdź połączenia I2C"));
+    // Serial.println(F("Błąd inicjalizacji czujnika BH1750! Sprawdź połączenia I2C"));
   }
   delay(500);
   
   // Inicjalizacja PIR - 60% postępu
   drawProgressBar(10, 30, 108, 10, 60);
   pinMode(PIR_PIN, INPUT);
-  Serial.println(F("Czujnik ruchu PIR zainicjalizowany - wykrywa ruch w pomieszczeniu"));
+  // Serial.println(F("Czujnik ruchu PIR zainicjalizowany - wykrywa ruch w pomieszczeniu"));
   delay(500);
   
   // Inicjalizacja serwo SG90 - 75% postępu
   drawProgressBar(10, 30, 108, 10, 75);
   sg90.attach(SERVO_PIN);
   sg90.write(0);  // Ustaw serwo w pozycji początkowej
-  Serial.println(F("Serwo SG90 zainicjalizowane - nie będzie aktywnie używane w tej wersji"));
+  // Serial.println(F("Serwo SG90 zainicjalizowane - nie będzie aktywnie używane w tej wersji"));
   delay(500);
   
   // Inicjalizacja silnika krokowego - 90% postępu
   drawProgressBar(10, 30, 108, 10, 90);
   stepper.setSpeed(10);  // RPM (obroty na minutę)
-  Serial.println(F("Silnik krokowy 28BYJ-48 zainicjalizowany - nie będzie aktywnie używany w tej wersji"));
+  // Serial.println(F("Silnik krokowy 28BYJ-48 zainicjalizowany - nie będzie aktywnie używany w tej wersji"));
   delay(500);
   
   // Inicjalizacja buzzera - 100% postępu
   drawProgressBar(10, 30, 108, 10, 100);
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);  // Wyłączenie buzzera na początku
-  Serial.println(F("Pin buzzera zainicjalizowany - symulacja alarmu bez dźwięku"));
+  // Serial.println(F("Pin buzzera zainicjalizowany - symulacja alarmu bez dźwięku"));
   delay(500);
   
   // Informacja o zakończeniu inicjalizacji
@@ -220,26 +220,26 @@ void checkAlarmConditions() {
   bool shouldActivateAlarm = lightTrigger || airTrigger || motionTrigger;
   
   // Wyświetlamy szczegółowe informacje w terminalu
-  Serial.println(F("Sprawdzenie warunków alarmu:"));
-  Serial.print(F("- Światło: "));
-  Serial.print(lightLevel);
-  Serial.print(F(" lux (próg: "));
-  Serial.print(LIGHT_THRESHOLD);
-  Serial.print(F("): "));
-  Serial.println(lightTrigger ? F("PRZEKROCZONY") : F("W NORMIE"));
+  // Serial.println(F("Sprawdzenie warunków alarmu:"));
+  // Serial.print(F("- Światło: "));
+  // Serial.print(lightLevel);
+  // Serial.print(F(" lux (próg: "));
+  // Serial.print(LIGHT_THRESHOLD);
+  // Serial.print(F("): "));
+  // Serial.println(lightTrigger ? F("PRZEKROCZONY") : F("W NORMIE"));
   
-  Serial.print(F("- Jakość powietrza: "));
-  Serial.print(airQualityPercent);
-  Serial.print(F("% (próg: <"));
-  Serial.print(AIR_QUALITY_THRESHOLD);
-  Serial.print(F("%): "));
-  Serial.println(airTrigger ? F("PONIŻEJ NORMY") : F("W NORMIE"));
+  // Serial.print(F("- Jakość powietrza: "));
+  // Serial.print(airQualityPercent);
+  // Serial.print(F("% (próg: <"));
+  // Serial.print(AIR_QUALITY_THRESHOLD);
+  // Serial.print(F("%): "));
+  // Serial.println(airTrigger ? F("PONIŻEJ NORMY") : F("W NORMIE"));
   
-  Serial.print(F("- Ruch: "));
-  Serial.println(motionTrigger ? F("WYKRYTY") : F("BRAK"));
+  // Serial.print(F("- Ruch: "));
+  // Serial.println(motionTrigger ? F("WYKRYTY") : F("BRAK"));
   
-  Serial.print(F("Alarm powinien być: "));
-  Serial.println(shouldActivateAlarm ? F("AKTYWNY") : F("NIEAKTYWNY"));
+  // Serial.print(F("Alarm powinien być: "));
+  // Serial.println(shouldActivateAlarm ? F("AKTYWNY") : F("NIEAKTYWNY"));
   
   // Aktualizujemy flagę symulacji buzzera
   buzzerTesting = shouldActivateAlarm;
@@ -289,14 +289,14 @@ void readSensors() {
       dhtErrorCount = 0;
     } else {
       dhtErrorCount++;
-      Serial.println(F("Odczyty DHT poza zakresem! Sprawdź warunki pomiaru"));
+      // Serial.println(F("Odczyty DHT poza zakresem! Sprawdź warunki pomiaru"));
     }
   } else {
     dhtErrorCount++;
-    Serial.println(F("Błąd odczytu z czujnika DHT! Sprawdź połączenia"));
+    // Serial.println(F("Błąd odczytu z czujnika DHT! Sprawdź połączenia"));
     
     if (dhtErrorCount > 5) {
-      Serial.println(F("Powtarzające się błędy DHT - sprawdź okablowanie i czy czujnik działa poprawnie"));
+      // Serial.println(F("Powtarzające się błędy DHT - sprawdź okablowanie i czy czujnik działa poprawnie"));
     }
   }
   
@@ -376,8 +376,8 @@ void updateDisplay() {
 void setup() {
   // Rozpocznij komunikację przez port szeregowy z prędkością 9600 bps
   Serial.begin(9600);
-  Serial.println(F("Inicjalizacja systemu wieloczujnikowego Smart House..."));
-  Serial.println(F("Projekt studencki dla Akademii WSB"));
+  // Serial.println(F("Inicjalizacja systemu wieloczujnikowego Smart House..."));
+  // Serial.println(F("Projekt studencki dla Akademii WSB"));
   
   // Konfiguracja pinów dla silnika krokowego - ustawiamy jako wyjścia
   pinMode(IN1, OUTPUT);
@@ -387,7 +387,7 @@ void setup() {
   
   // Inicjalizacja wyświetlacza OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("Błąd inicjalizacji wyświetlacza SSD1306! Sprawdź połączenia"));
+    // Serial.println(F("Błąd inicjalizacji wyświetlacza SSD1306! Sprawdź połączenia"));
     while(1);  // Zatrzymaj program jeśli wyświetlacz nie działa
   }
   
@@ -397,9 +397,9 @@ void setup() {
   // Inicjalizacja wszystkich czujników z paskiem postępu
   initSensors();
   
-  Serial.println(F("Stabilizacja czujnika ruchu (60 sekund)..."));
-  Serial.println(F("Ten czas jest potrzebny, aby czujnik PIR ustabilizował swoje odczyty"));
-  Serial.println(F("i zaczął poprawnie wykrywać ruch (zmniejsza liczbę fałszywych alarmów)"));
+  // Serial.println(F("Stabilizacja czujnika ruchu (60 sekund)..."));
+  // Serial.println(F("Ten czas jest potrzebny, aby czujnik PIR ustabilizował swoje odczyty"));
+  // Serial.println(F("i zaczął poprawnie wykrywać ruch (zmniejsza liczbę fałszywych alarmów)"));
   
   // Komunikat na wyświetlaczu o stabilizacji
   display.clearDisplay();
@@ -419,8 +419,8 @@ void setup() {
   lastMotionTime = millis();
   lastDisplayUpdateTime = millis();
   
-  Serial.println(F("System wieloczujnikowy Smart House gotowy do pracy!"));
-  Serial.println(F("Rozpoczynam monitoring..."));
+  // Serial.println(F("System wieloczujnikowy Smart House gotowy do pracy!"));
+  // Serial.println(F("Rozpoczynam monitoring..."));
 }
 
 void loop() {
