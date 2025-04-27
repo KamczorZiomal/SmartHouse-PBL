@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart House Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 40px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+
+    th {
+      background-color: #1f1f1f;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a1a;
+    }
+
+    canvas {
+      background-color: #1f1f1f;
+      border-radius: 10px;
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🏠 Smart House Dashboard</h1>
+
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Temperature (°C)</th>
+        <th>Humidity (%)</th>
+        <th>Air Quality (%)</th>
+        <th>Light Intensity (%)</th>
+        <th>Lux (lx)</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <!-- JavaScript wypełni -->
+    </tbody>
+  </table>
+
+  <h2>📊 Live Charts</h2>
+
+  <canvas id="tempChart"></canvas>
+  <canvas id="humChart"></canvas>
+  <canvas id="airChart"></canvas>
+  <canvas id="lightChart"></canvas>
+
+  <script>
+    const tableBody = document.getElementById('table-body');
+
+    const tempChart = new Chart(document.getElementById('tempChart').getContext('2d'), chartConfig('Temperature (°C)', 'rgba(255, 99, 132, 1)'));
+    const humChart = new Chart(document.getElementById('humChart').getContext('2d'), chartConfig('Humidity (%)', 'rgba(54, 162, 235, 1)'));
+    const airChart = new Chart(document.getElementById('airChart').getContext('2d'), chartConfig('Air Quality (%)', 'rgba(75, 192, 192, 1)'));
+    const lightChart = new Chart(document.getElementById('lightChart').getContext('2d'), chartConfig('Light Intensity (%)', 'rgba(255, 206, 86, 1)'));
+
+    function chartConfig(label, color) {
+      return {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: label,
+            data: [],
+            borderColor: color,
+            backgroundColor: color.replace('1)', '0.2)'),
+            tension: 0.4,
+            pointRadius: 3,
+            fill: true,
+          }]
+        },
+        options: {
+          scales: {
+            x: { ticks: { color: '#e0e0e0' }},
+            y: { ticks: { color: '#e0e0e0' }}
+          },
+          plugins: {
+            legend: { labels: { color: '#e0e0e0' }}
+          }
+        }
+      }
+    }
+
+    async function fetchData() {
+      const response = await fetch('/api/data');
+      const data = await response.json();
+
+      tableBody.innerHTML = '';
+      data.forEach(entry => {
+        tableBody.innerHTML += `<tr>
+          <td>${entry.timestamp}</td>
+          <td>${entry.temperature}</td>
+          <td>${entry.humidity}</td>
+          <td>${entry.air_quality}</td>
+          <td>${entry.light_percent}</td>
+          <td>${entry.lux}</td>
+        </tr>`;
+      });
+
+      const labels = data.map(e => e.timestamp);
+
+      updateChart(tempChart, labels, data.map(e => e.temperature));
+      updateChart(humChart, labels, data.map(e => e.humidity));
+      updateChart(airChart, labels, data.map(e => e.air_quality));
+      updateChart(lightChart, labels, data.map(e => e.light_percent));
+    }
+
+    function updateChart(chart, labels, data) {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.update();
+    }
+
+    fetchData();
+    setInterval(fetchData, 5000);
+  </script>
+
+</body>
+</html>
