@@ -27,7 +27,7 @@ def read_serial():
                 hum = float(buffer.split("Wilgotność:")[1].split("%")[0].strip())
                 air_quality = float(buffer.split("Jakość powietrza:")[1].split("%")[0].strip())
                 light_percent = float(buffer.split("Natężenie światła:")[1].split("%")[0].strip())
-                lux = int(buffer.split("(")[1].split("lux")[0].strip())
+                lux = float(buffer.split("(")[1].split("lux")[0].strip())
 
                 with app.app_context():
                     new_data = SensorData(
