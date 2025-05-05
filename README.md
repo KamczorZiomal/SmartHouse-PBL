@@ -1,9 +1,8 @@
 <h1 align="center">Smart Home 🏠</h1>
 <hr>
 
-<i align="center" style="font-style: italic;">Overview</i>
 
-
+<p align="center"><i style="font-style: italic;">Overview</i>.</p>
 <p align="center"><img src="Photos/frontend_view.png" alt="App Overview"></p>
 
 
