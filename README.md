@@ -1,46 +1,42 @@
-### Sklonuj repozytorium z gałęzi master (nie main!)
-![image](https://github.com/user-attachments/assets/be3044bd-60d8-4f31-a056-bdf06af45e7b)
+Smart Home 🏠
+==========
+_**Overview**_
+
+<img alt="App Overview" src="photos/frontend_view.png"/>
+
+### Lista kroków do uruchomienia aplikacji
+
+1. Sklonuj repozytorium z gałęzi master.
+2. Otwórz repozytorium w IDE.
+3. Zainstaluj wszystkie biblioteki:
+
+ `pip install -r requirements.txt`
+
+4. Zobacz czy w pliku **_serial_reader.py_** poniższa linia kodu zgadza się z twoim portem, jeśli nie to zmień na swoje.
+
+`ser = serial.Serial('COM3', 9600)  # Replace COM3 with your port`
+
+5. W jednym oknie terminala uruchom komendę, która odpowiada za połączenia z Arduino oraz zapisanie pobieranych danych do bazy **_sensors.db_**
+
+`python read_serial.py`
+
+6. W drugim oknie terminal uruchom komendę, która odpowiada za uruchomienie strony na localhoscie: http://127.0.0.1:5000
 
 
+`python app.py`
 
-### otwórz pliki w IDE (najlepiej pycharm chyba za darmo jest)
+7. Koniec
 
-### zainstaluj wszystkie biblioteki:<br><br>
-- pip install -r requirements.txt<br><br>
-![image](https://github.com/user-attachments/assets/5f51d0ce-a698-41a4-a652-6c4004f2416e)
+* Sqlite Database Structure
 
-## zobacz czy w pliku serial_reader.py wszystko się zgadza z twoim portem jak nie to zmień na swoje<br><br> 
-![image](https://github.com/user-attachments/assets/7bfe582a-621b-4251-b3ad-d7c01b99abd6)
-
-
-
-
-
-
- ### W jednym oknie terminala odpal tą komendę, odpowiada za połączenia się z Arduino ściągnieciu danych i zapisaniu w bazie sqlite.<br><br>
-
- ![image](https://github.com/user-attachments/assets/a96ed7b7-a30a-47cb-99eb-ba1c0fc75241)
-
-
-
-
-
-
-
-### w drugim oknie terminal odpal tą komendę równocześnie, odpowiada za stworzenie strony na localhoscie z wykresami itd.<br><br>
-
-
-
-
-  ![image](https://github.com/user-attachments/assets/5446be85-f98a-4337-823d-c303da1d8627)
-
-
+| id: _int_ | temperature: _int_ | humidity: _float_ | air_quality: _float_ | light_percent: _float_ | lux: _int_ | timestamp: _datetime_   |
+|-----------|--------------------|-------------------|----------------------|------------------------|------------|-------------------------|
+| 1         | 22.5               | 45                | 89.2                 | 65                     | 300        | 2025-05-04 08:00:00     |
+| 2         | 23                 | 46.2              | 87                   | 70                     | 320        | 2025-05-04 08:05:00     |
 
 
 
 
-### !!!Jak nie będzie działać to spróbuj w waszym kodzie arduino zakomentować wszystkie Serial.print i Serial.println oprócz tych na screenie niżej(nie zapomnij przesłać tego kodu do arduino ):<br><br>
- ![image](https://github.com/user-attachments/assets/e763b90f-b8e4-4d49-ab38-286c996ef282)
 
 
 
