@@ -2,7 +2,7 @@ Smart Home 🏠
 ==========
 _**Overview**_
 
-<img alt="App Overview" src="photos/frontend_view.png"/>
+<img alt="App Overview" src="Photos/frontend_view.png"/>
 
 ### Lista kroków do uruchomienia aplikacji
 
