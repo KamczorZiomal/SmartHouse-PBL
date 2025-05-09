@@ -450,335 +450,408 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-house-signal"></i>
-                <h1>Smart House</h1>
-            </div>
-
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" data-section="dashboard-section">
-                        <i class="fa-solid fa-gauge-high"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-section="users-section">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Użytkownicy</span>
-                    </a>
-                </li>
-            </ul>
-
-            <div class="project-info">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>Projekt zaliczeniowy PBL - Akademia WSB Dąbrowa Górnicza</span>
-            </div>
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-house-signal"></i>
+            <h1>Smart House</h1>
         </div>
 
-        <div class="main-content">
-            <div id="dashboard-section">
-                <div class="top-bar">
-                    <div class="page-title">
-                        <h1>Dashboard</h1>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-section="dashboard-section">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-section="users-section">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Użytkownicy</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="project-info">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Projekt zaliczeniowy PBL - Akademia WSB Dąbrowa Górnicza</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="dashboard-section">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>A</span>
                     </div>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <span>A</span>
-                        </div>
-                        <span>Admin</span>
+                    <span>Admin</span>
+                </div>
+            </div>
+
+            <div class="cards-container" id="sensor-data-container">
+                <div class="status-card temperature">
+                    <div class="icon">
+                        <i class="fa-solid fa-temperature-half"></i>
+                    </div>
+                    <h3>Temperatura</h3>
+                    <div class="value" id="temperature-value">--</div>
+                    <div class="trend" id="temperature-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od wczoraj
                     </div>
                 </div>
 
-                <div class="cards-container">
-                    <div class="status-card temperature">
-                        <div class="icon">
-                            <i class="fa-solid fa-temperature-half"></i>
-                        </div>
-                        <h3>Temperatura</h3>
-                        <div class="value">24.5°C</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +1.2°C od wczoraj
-                        </div>
+                <div class="status-card humidity">
+                    <div class="icon">
+                        <i class="fa-solid fa-droplet"></i>
                     </div>
-
-                    <div class="status-card humidity">
-                        <div class="icon">
-                            <i class="fa-solid fa-droplet"></i>
-                        </div>
-                        <h3>Wilgotność</h3>
-                        <div class="value">56.2%</div>
-                        <div class="trend down">
-                            <i class="fa-solid fa-arrow-down"></i> -3.4% od wczoraj
-                        </div>
-                    </div>
-
-                    <div class="status-card air-quality">
-                        <div class="icon">
-                            <i class="fa-solid fa-wind"></i>
-                        </div>
-                        <h3>Jakość Powietrza</h3>
-                        <div class="value">92%</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +5% od wczoraj
-                        </div>
-                    </div>
-
-                    <div class="status-card light">
-                        <div class="icon">
-                            <i class="fa-solid fa-sun"></i>
-                        </div>
-                        <h3>Naświetlenie</h3>
-                        <div class="value">63%</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +12% od wczoraj
-                        </div>
+                    <h3>Wilgotność</h3>
+                    <div class="value" id="humidity-value">--</div>
+                    <div class="trend" id="humidity-trend">
+                        <i class="fa-solid fa-arrow-down"></i> -- od wczoraj
                     </div>
                 </div>
 
-                <div class="control-panels">
-                    <div class="panel">
-                        <h2><i class="fa-solid fa-sliders"></i> Kontrola Urządzeń</h2>
-
-                        <div class="slider-control">
-                            <label>Serwo SG90 (Kąt)</label>
-                            <div class="slider-container">
-                                <span class="slider-value">0°</span>
-                                <div class="slider">
-                                    <div class="slider-fill"></div>
-                                    <div class="slider-thumb"></div>
-                                </div>
-                                <span class="slider-value">180°</span>
-                            </div>
-                        </div>
-
-                        <div class="slider-control">
-                            <label>Silnik Krokowy 28BYJ-48 (Kroki)</label>
-                            <div class="slider-container">
-                                <span class="slider-value">-2048</span>
-                                <div class="slider">
-                                    <div class="slider-fill"></div>
-                                    <div class="slider-thumb"></div>
-                                </div>
-                                <span class="slider-value">2048</span>
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button class="control-btn">Serwo 0°</button>
-                            <button class="control-btn active">Serwo 90°</button>
-                            <button class="control-btn">Serwo 180°</button>
-                        </div>
-
-                        <div class="button-group">
-                            <button class="control-btn">Włącz Buzzer</button>
-                            <button class="control-btn active">Wyłącz Buzzer</button>
-                        </div>
+                <div class="status-card air-quality">
+                    <div class="icon">
+                        <i class="fa-solid fa-wind"></i>
                     </div>
+                    <h3>Jakość Powietrza</h3>
+                    <div class="value" id="air-quality-value">--</div>
+                    <div class="trend" id="air-quality-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od wczoraj
+                    </div>
+                </div>
 
-                    <div class="panel">
-                        <h2><i class="fa-solid fa-shield-halved"></i> Status Bezpieczeństwa</h2>
-
-                        <div class="status-indicator">
-                            <div class="indicator active"></div>
-                            <span>System aktywny</span>
-                        </div>
-
-                        <div class="alert-panel active">
-                            <i class="fa-solid fa-person-walking"></i>
-                            <div class="content">
-                                <h3>Wykryto ruch!</h3>
-                                <p>Ostatnia detekcja: przed 2 minutami</p>
-                            </div>
-                        </div>
-
-                        <div id="motion-chart" class="chart-container"></div>
+                <div class="status-card light">
+                    <div class="icon">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <h3>Naświetlenie</h3>
+                    <div class="value" id="light-value">--</div>
+                    <div class="trend" id="light-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od wczoraj
                     </div>
                 </div>
             </div>
 
-            <div id="users-section">
-                <div class="top-bar">
-                    <div class="page-title">
-                        <h1>Użytkownicy</h1>
-                    </div>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <span>A</span>
+            <script>
+                function updateSensorData(data) {
+                    if (data && data.latest) {
+                        const latestData = data.latest;
+                        const oldestData = data.oldest;
+
+                        document.getElementById('temperature-value').textContent = `${latestData.temperature}°C`;
+                        document.getElementById('humidity-value').textContent = `${latestData.humidity}%`;
+                        document.getElementById('air-quality-value').textContent = `${latestData.air_quality}%`;
+                        document.getElementById('light-value').textContent = `${latestData.light_percent}%`;
+
+                        function updateTrend(currentValue, previousValue, trendElement) {
+                            const difference = currentValue - previousValue;
+                            const absDifference = Math.abs(difference).toFixed(1);
+                            if (difference > 0) {
+                                trendElement.innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${absDifference} od ostatniego pomiaru`;
+                                trendElement.classList.remove('down');
+                                trendElement.classList.add('up');
+                            } else if (difference < 0) {
+                                trendElement.innerHTML = `<i class="fa-solid fa-arrow-down"></i> ${absDifference} od ostatniego pomiaru`;
+                                trendElement.classList.remove('up');
+                                trendElement.classList.add('down');
+                            } else {
+                                trendElement.innerHTML = `<i class="fa-solid fa-equals"></i> Bez zmian`;
+                                trendElement.classList.remove('up', 'down');
+                            }
+                        }
+
+                        if (oldestData) {
+                            updateTrend(latestData.temperature, oldestData.temperature, document.getElementById('temperature-trend'));
+                            updateTrend(latestData.humidity, oldestData.humidity, document.getElementById('humidity-trend'));
+                            updateTrend(latestData.air_quality, oldestData.air_quality, document.getElementById('air-quality-trend'));
+                            updateTrend(latestData.light_percent, oldestData.light_percent, document.getElementById('light-trend'));
+                        } else {
+                            document.getElementById('temperature-trend').textContent = 'Brak danych do porównania';
+                            document.getElementById('humidity-trend').textContent = 'Brak danych do porównania';
+                            document.getElementById('air-quality-trend').textContent = 'Brak danych do porównania';
+                            document.getElementById('light-trend').textContent = 'Brak danych do porównania';
+                        }
+
+                    } else {
+                        console.log("No sensor data received.");
+                        document.getElementById('temperature-value').textContent = '--';
+                        document.getElementById('humidity-value').textContent = '--';
+                        document.getElementById('air-quality-value').textContent = '--';
+                        document.getElementById('light-value').textContent = '--';
+                        document.getElementById('temperature-trend').textContent = '';
+                        document.getElementById('humidity-trend').textContent = '';
+                        document.getElementById('air-quality-trend').textContent = '';
+                        document.getElementById('light-trend').textContent = '';
+                    }
+                }
+
+                async function fetchSensorData() {
+                    try {
+                        const response = await fetch('/api/data');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        updateSensorData(data);
+                    } catch (error) {
+                        console.error("Could not fetch sensor data:", error);
+                    }
+                }
+
+                // Fetch data initially
+                fetchSensorData();
+
+                // Optionally, you can set up an interval to refresh the data periodically
+                setInterval(fetchSensorData, 5000); // Refresh every 5 seconds
+            </script>
+
+            <div class="control-panels">
+                <div class="panel">
+                    <h2><i class="fa-solid fa-sliders"></i> Kontrola Urządzeń</h2>
+
+                    <div class="slider-control">
+                        <label>Serwo SG90 (Kąt)</label>
+                        <div class="slider-container">
+                            <span class="slider-value">0°</span>
+                            <div class="slider">
+                                <div class="slider-fill"></div>
+                                <div class="slider-thumb"></div>
+                            </div>
+                            <span class="slider-value">180°</span>
                         </div>
-                        <span>Admin</span>
+                    </div>
+
+                    <div class="slider-control">
+                        <label>Silnik Krokowy 28BYJ-48 (Kroki)</label>
+                        <div class="slider-container">
+                            <span class="slider-value">-2048</span>
+                            <div class="slider">
+                                <div class="slider-fill"></div>
+                                <div class="slider-thumb"></div>
+                            </div>
+                            <span class="slider-value">2048</span>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="control-btn">Serwo 0°</button>
+                        <button class="control-btn active">Serwo 90°</button>
+                        <button class="control-btn">Serwo 180°</button>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="control-btn">Włącz Buzzer</button>
+                        <button class="control-btn active">Wyłącz Buzzer</button>
                     </div>
                 </div>
 
                 <div class="panel">
-                    <h2><i class="fa-solid fa-users"></i> Członkowie Zespołu Projektowego</h2>
+                    <h2><i class="fa-solid fa-shield-halved"></i> Status Bezpieczeństwa</h2>
 
-                    <ul class="user-list">
-                        <li>
-                            <div class="user-avatar">
-                                <span>DW</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Damian Wojdyła</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>DK</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Damian Kaczmarski</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>JH</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Jakub Hyla</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>SK</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Szymon Kaczmarzyk</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>WC</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Wiktor Chmiest</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                    </ul>
+                    <div class="status-indicator">
+                        <div class="indicator active"></div>
+                        <span>System aktywny</span>
+                    </div>
+
+                    <div class="alert-panel active">
+                        <i class="fa-solid fa-person-walking"></i>
+                        <div class="content">
+                            <h3>Wykryto ruch!</h3>
+                            <p>Ostatnia detekcja: przed 2 minutami</p>
+                        </div>
+                    </div>
+
+                    <div id="motion-chart" class="chart-container"></div>
                 </div>
             </div>
         </div>
+
+        <div id="users-section">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Użytkownicy</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>A</span>
+                    </div>
+                    <span>Admin</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2><i class="fa-solid fa-users"></i> Członkowie Zespołu Projektowego</h2>
+
+                <ul class="user-list">
+                    <li>
+                        <div class="user-avatar">
+                            <span>DW</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Damian Wojdyła</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>DK</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Damian Kaczmarski</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>JH</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Jakub Hyla</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>SK</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Szymon Kaczmarzyk</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>WC</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Wiktor Chmiest</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script>
-        // Symulacja działania suwaków
-        const sliders = document.querySelectorAll('.slider');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Symulacja działania suwaków
+    const sliders = document.querySelectorAll('.slider');
 
-        sliders.forEach(slider => {
-            const thumb = slider.querySelector('.slider-thumb');
-            const fill = slider.querySelector('.slider-fill');
-            let isDragging = false;
+    sliders.forEach(slider => {
+        const thumb = slider.querySelector('.slider-thumb');
+        const fill = slider.querySelector('.slider-fill');
+        let isDragging = false;
 
-            slider.addEventListener('mousedown', (e) => {
-                isDragging = true;
+        slider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateSliderPosition(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
                 updateSliderPosition(e);
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    updateSliderPosition(e);
-                }
-            });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-
-            function updateSliderPosition(e) {
-                const sliderRect = slider.getBoundingClientRect();
-                const position = (e.clientX - sliderRect.left) / sliderRect.width;
-                const clampedPosition = Math.max(0, Math.min(1, position));
-
-                thumb.style.left = `${clampedPosition * 100}%`;
-                fill.style.width = `${clampedPosition * 100}%`;
             }
         });
 
-        // Wykres ruchu
-        const ctx = document.createElement('canvas');
-        document.getElementById('motion-chart').appendChild(ctx);
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
-                datasets: [{
-                    label: 'Detekcje ruchu',
-                    data: [2, 5, 1, 0, 3, 7],
-                    borderColor: '#ef476f',
-                    backgroundColor: 'rgba(239, 71, 111, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
+        function updateSliderPosition(e) {
+            const sliderRect = slider.getBoundingClientRect();
+            const position = (e.clientX - sliderRect.left) / sliderRect.width;
+            const clampedPosition = Math.max(0, Math.min(1, position));
+
+            thumb.style.left = `${clampedPosition * 100}%`;
+            fill.style.width = `${clampedPosition * 100}%`;
+        }
+    });
+
+    // Wykres ruchu
+    const ctx = document.createElement('canvas');
+    document.getElementById('motion-chart').appendChild(ctx);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+            datasets: [{
+                label: 'Detekcje ruchu',
+                data: [2, 5, 1, 0, 3, 7],
+                borderColor: '#ef476f',
+                backgroundColor: 'rgba(239, 71, 111, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
                     }
                 }
             }
-        });
+        }
+    });
 
-        // Przyciski sterujące
-        const controlButtons = document.querySelectorAll('.control-btn');
+    // Przyciski sterujące
+    const controlButtons = document.querySelectorAll('.control-btn');
 
-        controlButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Usunięcie klasy active z przycisków w tej samej grupie
-                const parentGroup = button.parentElement;
-                parentGroup.querySelectorAll('.control-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
-                // Dodanie klasy active do klikniętego przycisku
-                button.classList.add('active');
+    controlButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Usunięcie klasy active z przycisków w tej samej grupie
+            const parentGroup = button.parentElement;
+            parentGroup.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
             });
+
+            // Dodanie klasy active do klikniętego przycisku
+            button.classList.add('active');
         });
+    });
 
-        // Obsługa zmiany sekcji (Dashboard/Użytkownicy)
-        const navLinks = document.querySelectorAll('.nav-link');
-        const sections = document.querySelectorAll('#dashboard-section, #users-section');
+    // Obsługa zmiany sekcji (Dashboard/Użytkownicy)
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('#dashboard-section, #users-section');
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
 
-                // Usunięcie klasy active ze wszystkich linków
-                navLinks.forEach(navLink => navLink.classList.remove('active'));
+            // Usunięcie klasy active ze wszystkich linków
+            navLinks.forEach(navLink => navLink.classList.remove('active'));
 
-                // Dodanie klasy active do klikniętego linku
-                link.classList.add('active');
+            // Dodanie klasy active do klikniętego linku
+            link.classList.add('active');
 
-                // Ukrycie wszystkich sekcji
-                sections.forEach(section => section.style.display = 'none');
+            // Ukrycie wszystkich sekcji
+            sections.forEach(section => section.style.display = 'none');
 
-                // Wyświetlenie wybranej sekcji
-                const sectionId = link.getAttribute('data-section');
-                document.getElementById(sectionId).style.display = 'block';
-            });
+            // Wyświetlenie wybranej sekcji
+            const sectionId = link.getAttribute('data-section');
+            document.getElementById(sectionId).style.display = 'block';
         });
+    });
 
-        // Inicjalne wyświetlenie sekcji Dashboard
-        document.getElementById('dashboard-section').style.display = 'block';
-    </script>
+    // Inicjalne wyświetlenie sekcji Dashboard
+    document.getElementById('dashboard-section').style.display = 'block';
+</script>
 </body>
 </html>
