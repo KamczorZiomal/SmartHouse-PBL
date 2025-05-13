@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<body>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -18,24 +19,24 @@
             --gray: #6c757d;
             --light-gray: #e9ecef;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: #f5f7fb;
             color: var(--dark);
         }
-        
+
         .container {
             display: flex;
             min-height: 100vh;
         }
-        
+
         .sidebar {
             width: 250px;
             background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
@@ -46,34 +47,35 @@
             box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
+            z-index: 100;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
             margin-bottom: 40px;
             padding: 10px 0;
         }
-        
+
         .logo i {
             font-size: 24px;
             margin-right: 10px;
         }
-        
+
         .logo h1 {
             font-size: 20px;
             font-weight: 600;
         }
-        
+
         .nav-menu {
             list-style: none;
             margin-bottom: 20px;
         }
-        
+
         .nav-item {
             margin-bottom: 10px;
         }
-        
+
         .nav-link {
             display: flex;
             align-items: center;
@@ -82,19 +84,20 @@
             text-decoration: none;
             color: white;
             transition: all 0.3s;
+            cursor: pointer;
         }
-        
+
         .nav-link:hover,
         .nav-link.active {
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         .nav-link i {
             margin-right: 10px;
             width: 20px;
             text-align: center;
         }
-        
+
         .project-info {
             margin-top: auto;
             padding: 15px 0;
@@ -103,35 +106,35 @@
             font-size: 12px;
             opacity: 0.8;
         }
-        
+
         .project-info i {
             font-size: 18px;
             margin-right: 10px;
         }
-        
+
         .main-content {
             flex: 1;
             margin-left: 250px;
             padding: 30px;
         }
-        
+
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
-        
+
         .page-title h1 {
             font-size: 28px;
             font-weight: 700;
         }
-        
+
         .user-info {
             display: flex;
             align-items: center;
         }
-        
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -144,7 +147,7 @@
             font-weight: bold;
             margin-right: 10px;
         }
-        
+
         .status-card {
             background-color: white;
             border-radius: 16px;
@@ -153,11 +156,11 @@
             margin-bottom: 20px;
             transition: transform 0.3s ease;
         }
-        
+
         .status-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .status-card .icon {
             width: 60px;
             height: 60px;
@@ -169,101 +172,101 @@
             color: white;
             margin-bottom: 15px;
         }
-        
+
         .temperature .icon {
             background: linear-gradient(45deg, #ff5e62, #ff9966);
         }
-        
+
         .humidity .icon {
             background: linear-gradient(45deg, #4cc9f0, #4361ee);
         }
-        
+
         .air-quality .icon {
             background: linear-gradient(45deg, #06d6a0, #1b9aaa);
         }
-        
+
         .light .icon {
             background: linear-gradient(45deg, #ffd166, #ef476f);
         }
-        
+
         .status-card h3 {
             font-size: 14px;
             color: var(--gray);
             margin-bottom: 5px;
         }
-        
+
         .status-card .value {
             font-size: 32px;
             font-weight: 700;
         }
-        
+
         .status-card .trend {
             display: flex;
             align-items: center;
             font-size: 12px;
             margin-top: 8px;
         }
-        
+
         .status-card .trend.up {
             color: #06d6a0;
         }
-        
+
         .status-card .trend.down {
             color: var(--danger);
         }
-        
+
         .status-card .trend i {
             margin-right: 5px;
         }
-        
+
         .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
         }
-        
+
         .control-panels {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 30px;
         }
-        
+
         .panel {
             background-color: white;
             border-radius: 16px;
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
-        
+
         .panel h2 {
             font-size: 18px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
         }
-        
+
         .panel h2 i {
             margin-right: 10px;
             color: var(--primary);
         }
-        
+
         .slider-control {
             margin-bottom: 20px;
         }
-        
+
         .slider-control label {
             display: block;
             margin-bottom: 10px;
             color: var(--gray);
             font-size: 14px;
         }
-        
+
         .slider-container {
             display: flex;
             align-items: center;
         }
-        
+
         .slider {
             flex: 1;
             height: 5px;
@@ -272,7 +275,7 @@
             position: relative;
             margin: 0 15px;
         }
-        
+
         .slider-fill {
             position: absolute;
             height: 100%;
@@ -280,7 +283,7 @@
             border-radius: 5px;
             width: 50%;
         }
-        
+
         .slider-thumb {
             width: 20px;
             height: 20px;
@@ -293,20 +296,27 @@
             left: 50%;
             cursor: pointer;
         }
-        
+
         .slider-value {
             font-weight: 600;
             width: 40px;
             text-align: center;
         }
-        
+
+        .current-value {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 10px;
+            color: var(--primary);
+        }
+
         .button-group {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         .control-btn {
             padding: 10px 15px;
             border: none;
@@ -317,17 +327,17 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .control-btn:hover {
             background-color: var(--gray);
             color: white;
         }
-        
+
         .control-btn.active {
             background-color: var(--primary);
             color: white;
         }
-        
+
         .alert-panel {
             display: flex;
             align-items: center;
@@ -337,70 +347,70 @@
             border-radius: 8px;
             margin-top: 20px;
         }
-        
+
         .alert-panel.active {
             background-color: rgba(239, 71, 111, 0.2);
         }
-        
+
         .alert-panel i {
             font-size: 24px;
             color: var(--danger);
             margin-right: 15px;
         }
-        
+
         .alert-panel .content h3 {
             font-size: 16px;
             margin-bottom: 5px;
         }
-        
+
         .alert-panel .content p {
             font-size: 14px;
             color: var(--gray);
         }
-        
+
         .status-indicator {
             display: flex;
             align-items: center;
             margin-top: 15px;
         }
-        
+
         .indicator {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             margin-right: 8px;
         }
-        
+
         .indicator.active {
             background-color: #06d6a0;
             box-shadow: 0 0 0 3px rgba(6, 214, 160, 0.2);
         }
-        
+
         .indicator.inactive {
             background-color: var(--gray);
         }
-        
+
         .chart-container {
             width: 100%;
             height: 200px;
             margin-top: 20px;
         }
-        
+
         .user-list {
             list-style: none;
         }
-        
+
         .user-list li {
             padding: 15px 0;
             border-bottom: 1px solid var(--light-gray);
             display: flex;
             align-items: center;
         }
-        
+
         .user-list li:last-child {
             border-bottom: none;
         }
-        
+
         .user-list .user-avatar {
             margin-right: 15px;
             display: flex;
@@ -410,39 +420,103 @@
             color: white;
             font-weight: bold;
         }
-        
+
         .user-list .user-details h4 {
             font-size: 16px;
             margin-bottom: 3px;
         }
-        
+
         .user-list .user-details p {
             font-size: 14px;
             color: var(--gray);
         }
-        
-        #users-section {
+
+        .section {
             display: none;
         }
+
+        .section.active {
+            display: block;
+        }
         
+        .success-message, .error-message {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        
+        .success-message {
+            background-color: rgba(6, 214, 160, 0.2);
+            color: #06d6a0;
+            border-left: 3px solid #06d6a0;
+        }
+        
+        .error-message {
+            background-color: rgba(239, 71, 111, 0.2);
+            color: var(--danger);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .visible {
+            opacity: 1;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light-gray);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 70px;
                 padding: 20px 10px;
             }
-            
+
             .logo h1, .nav-link span, .project-info span {
                 display: none;
             }
-            
+
             .project-info {
                 justify-content: center;
             }
-            
+
             .main-content {
                 margin-left: 70px;
             }
-            
+
             .cards-container {
                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             }
@@ -450,335 +524,731 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-house-signal"></i>
-                <h1>Smart House</h1>
+<div class="loading-overlay">
+    <div class="spinner"></div>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-house-signal"></i>
+            <h1>Smart House</h1>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a class="nav-link active" data-section="dashboard-section">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-section="users-section">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Użytkownicy</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="project-info">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>Projekt zaliczeniowy PBL - Akademia WSB Dąbrowa Górnicza</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="dashboard-section" class="section active">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>A</span>
+                    </div>
+                    <span>Admin</span>
+                </div>
             </div>
-            
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link active" data-section="dashboard-section">
-                        <i class="fa-solid fa-gauge-high"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link" data-section="users-section">
-                        <i class="fa-solid fa-users"></i>
-                        <span>Użytkownicy</span>
-                    </a>
-                </li>
-            </ul>
-            
-            <div class="project-info">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>Projekt zaliczeniowy PBL - Akademia WSB Dąbrowa Górnicza</span>
+
+            <div class="cards-container" id="sensor-data-container">
+                <div class="status-card temperature">
+                    <div class="icon">
+                        <i class="fa-solid fa-temperature-half"></i>
+                    </div>
+                    <h3>Temperatura</h3>
+                    <div class="value" id="temperature-value">--</div>
+                    <div class="trend" id="temperature-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od ostatniego pomiaru
+                    </div>
+                </div>
+
+                <div class="status-card humidity">
+                    <div class="icon">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <h3>Wilgotność</h3>
+                    <div class="value" id="humidity-value">--</div>
+                    <div class="trend" id="humidity-trend">
+                        <i class="fa-solid fa-arrow-down"></i> -- od ostatniego pomiaru
+                    </div>
+                </div>
+
+                <div class="status-card air-quality">
+                    <div class="icon">
+                        <i class="fa-solid fa-wind"></i>
+                    </div>
+                    <h3>Jakość Powietrza</h3>
+                    <div class="value" id="air-quality-value">--</div>
+                    <div class="trend" id="air-quality-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od ostatniego pomiaru
+                    </div>
+                </div>
+
+                <div class="status-card light">
+                    <div class="icon">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <h3>Naświetlenie</h3>
+                    <div class="value" id="light-value">--</div>
+                    <div class="trend" id="light-trend">
+                        <i class="fa-solid fa-arrow-up"></i> -- od ostatniego pomiaru
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panels">
+                <div class="panel">
+                    <h2><i class="fa-solid fa-sliders"></i> Kontrola Urządzeń</h2>
+
+                    <div class="slider-control">
+                        <label>Serwo SG90 (Kąt)</label>
+                        <div class="slider-container">
+                            <span class="slider-value">0°</span>
+                            <div class="slider" id="servo-slider">
+                                <div class="slider-fill"></div>
+                                <div class="slider-thumb"></div>
+                            </div>
+                            <span class="slider-value">180°</span>
+                        </div>
+                        <div class="current-value">Aktualny kąt: <span id="current-servo-angle">90°</span></div>
+                    </div>
+
+                    <div class="slider-control">
+                        <label>Silnik Krokowy 28BYJ-48 (Kroki)</label>
+                        <div class="slider-container">
+                            <span class="slider-value">-2048</span>
+                            <div class="slider" id="stepper-slider">
+                                <div class="slider-fill"></div>
+                                <div class="slider-thumb"></div>
+                            </div>
+                            <span class="slider-value">2048</span>
+                        </div>
+                        <div class="current-value">Aktualna pozycja: <span id="current-stepper-position">0</span> kroków</div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="control-btn" data-servo="0">Serwo 0°</button>
+                        <button class="control-btn active" data-servo="90">Serwo 90°</button>
+                        <button class="control-btn" data-servo="180">Serwo 180°</button>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="control-btn" id="buzzer-on">Włącz Buzzer</button>
+                        <button class="control-btn active" id="buzzer-off">Wyłącz Buzzer</button>
+                    </div>
+                    
+                    <div class="success-message" id="success-message"></div>
+                    <div class="error-message" id="error-message"></div>
+                </div>
+
+                <div class="panel">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Status Bezpieczeństwa</h2>
+
+                    <div class="status-indicator">
+                        <div class="indicator active" id="security-status"></div>
+                        <span id="security-status-text">System aktywny</span>
+                    </div>
+
+                    <div class="alert-panel" id="motion-alert">
+                        <i class="fa-solid fa-person-walking"></i>
+                        <div class="content">
+                            <h3>Wykryto ruch!</h3>
+                            <p id="last-motion-time">Ostatnia detekcja: --</p>
+                        </div>
+                    </div>
+
+                    <div id="motion-chart" class="chart-container"></div>
+                </div>
             </div>
         </div>
-        
-        <div class="main-content">
-            <div id="dashboard-section">
-                <div class="top-bar">
-                    <div class="page-title">
-                        <h1>Dashboard</h1>
-                    </div>
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            <span>A</span>
-                        </div>
-                        <span>Admin</span>
-                    </div>
+
+        <div id="users-section" class="section">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Użytkownicy</h1>
                 </div>
-                
-                <div class="cards-container">
-                    <div class="status-card temperature">
-                        <div class="icon">
-                            <i class="fa-solid fa-temperature-half"></i>
-                        </div>
-                        <h3>Temperatura</h3>
-                        <div class="value">24.5°C</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +1.2°C od wczoraj
-                        </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>A</span>
                     </div>
-                    
-                    <div class="status-card humidity">
-                        <div class="icon">
-                            <i class="fa-solid fa-droplet"></i>
-                        </div>
-                        <h3>Wilgotność</h3>
-                        <div class="value">56.2%</div>
-                        <div class="trend down">
-                            <i class="fa-solid fa-arrow-down"></i> -3.4% od wczoraj
-                        </div>
-                    </div>
-                    
-                    <div class="status-card air-quality">
-                        <div class="icon">
-                            <i class="fa-solid fa-wind"></i>
-                        </div>
-                        <h3>Jakość Powietrza</h3>
-                        <div class="value">92%</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +5% od wczoraj
-                        </div>
-                    </div>
-                    
-                    <div class="status-card light">
-                        <div class="icon">
-                            <i class="fa-solid fa-sun"></i>
-                        </div>
-                        <h3>Naświetlenie</h3>
-                        <div class="value">63%</div>
-                        <div class="trend up">
-                            <i class="fa-solid fa-arrow-up"></i> +12% od wczoraj
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="control-panels">
-                    <div class="panel">
-                        <h2><i class="fa-solid fa-sliders"></i> Kontrola Urządzeń</h2>
-                        
-                        <div class="slider-control">
-                            <label>Serwo SG90 (Kąt)</label>
-                            <div class="slider-container">
-                                <span class="slider-value">0°</span>
-                                <div class="slider">
-                                    <div class="slider-fill"></div>
-                                    <div class="slider-thumb"></div>
-                                </div>
-                                <span class="slider-value">180°</span>
-                            </div>
-                        </div>
-                        
-                        <div class="slider-control">
-                            <label>Silnik Krokowy 28BYJ-48 (Kroki)</label>
-                            <div class="slider-container">
-                                <span class="slider-value">-2048</span>
-                                <div class="slider">
-                                    <div class="slider-fill"></div>
-                                    <div class="slider-thumb"></div>
-                                </div>
-                                <span class="slider-value">2048</span>
-                            </div>
-                        </div>
-                        
-                        <div class="button-group">
-                            <button class="control-btn">Serwo 0°</button>
-                            <button class="control-btn active">Serwo 90°</button>
-                            <button class="control-btn">Serwo 180°</button>
-                        </div>
-                        
-                        <div class="button-group">
-                            <button class="control-btn">Włącz Buzzer</button>
-                            <button class="control-btn active">Wyłącz Buzzer</button>
-                        </div>
-                    </div>
-                    
-                    <div class="panel">
-                        <h2><i class="fa-solid fa-shield-halved"></i> Status Bezpieczeństwa</h2>
-                        
-                        <div class="status-indicator">
-                            <div class="indicator active"></div>
-                            <span>System aktywny</span>
-                        </div>
-                        
-                        <div class="alert-panel active">
-                            <i class="fa-solid fa-person-walking"></i>
-                            <div class="content">
-                                <h3>Wykryto ruch!</h3>
-                                <p>Ostatnia detekcja: przed 2 minutami</p>
-                            </div>
-                        </div>
-                        
-                        <div id="motion-chart" class="chart-container"></div>
-                    </div>
+                    <span>Admin</span>
                 </div>
             </div>
-            
-            <div id="users-section">
-                <div class="top-bar">
-                    <div class="page-title">
-                        <h1>Użytkownicy</h1>
-                    </div>
-                    <div class="user-info">
+
+            <div class="panel">
+                <h2><i class="fa-solid fa-users"></i> Członkowie Zespołu Projektowego</h2>
+
+                <ul class="user-list">
+                    <li>
                         <div class="user-avatar">
-                            <span>A</span>
+                            <span>DW</span>
                         </div>
-                        <span>Admin</span>
-                    </div>
-                </div>
-                
-                <div class="panel">
-                    <h2><i class="fa-solid fa-users"></i> Członkowie Zespołu Projektowego</h2>
-                    
-                    <ul class="user-list">
-                        <li>
-                            <div class="user-avatar">
-                                <span>DW</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Damian Wojdyła</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>DK</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Damian Kaczmarski</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>JH</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Jakub Hyla</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>SK</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Szymon Kaczmarzyk</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="user-avatar">
-                                <span>WC</span>
-                            </div>
-                            <div class="user-details">
-                                <h4>Wiktor Chmiest</h4>
-                                <p>Członek zespołu</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                        <div class="user-details">
+                            <h4>Damian Wojdyła</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>DK</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Damian Kaczmarski</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>JH</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Jakub Hyla</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>SK</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Szymon Kaczmarzyk</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="user-avatar">
+                            <span>WC</span>
+                        </div>
+                        <div class="user-details">
+                            <h4>Wiktor Chmiest</h4>
+                            <p>Członek zespołu</p>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Global variables for device state
+    const deviceState = {
+        servoAngle: 90,
+        stepperPosition: 0,
+        buzzerOn: false,
+        securityActive: true,
+        lastMotionTime: "Brak detekcji"
+    };
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script>
-        // Symulacja działania suwaków
-        const sliders = document.querySelectorAll('.slider');
+    // Loading overlay functions
+    function showLoading() {
+        document.querySelector('.loading-overlay').classList.add('active');
+    }
+    
+    function hideLoading() {
+        document.querySelector('.loading-overlay').classList.remove('active');
+    }
+    
+    // Function to show notifications
+    function showNotification(message, isError = false) {
+        const successMsg = document.getElementById('success-message');
+        const errorMsg = document.getElementById('error-message');
         
-        sliders.forEach(slider => {
-            const thumb = slider.querySelector('.slider-thumb');
-            const fill = slider.querySelector('.slider-fill');
-            let isDragging = false;
+        if (isError) {
+            errorMsg.textContent = message;
+            errorMsg.classList.add('visible');
+            setTimeout(() => errorMsg.classList.remove('visible'), 3000);
+        } else {
+            successMsg.textContent = message;
+            successMsg.classList.add('visible');
+            setTimeout(() => successMsg.classList.remove('visible'), 3000);
+        }
+    }
+
+    // Function to fetch sensor data from the database
+    async function fetchSensorData() {
+        showLoading();
+        
+        try {
+            const response = await fetch('/api/sensors');
             
-            slider.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                updateSliderPosition(e);
-            });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    updateSliderPosition(e);
-                }
-            });
-            
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-            
-            function updateSliderPosition(e) {
-                const sliderRect = slider.getBoundingClientRect();
-                const position = (e.clientX - sliderRect.left) / sliderRect.width;
-                const clampedPosition = Math.max(0, Math.min(1, position));
-                
-                thumb.style.left = `${clampedPosition * 100}%`;
-                fill.style.width = `${clampedPosition * 100}%`;
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
-        });
+            
+            const data = await response.json();
+            updateSensorDisplay(data);
+            return true;
+            
+        } catch (error) {
+            console.error("Failed to fetch sensor data:", error);
+            showNotification("Nie udało się pobrać danych z czujników. Używam danych testowych.", true);
+            
+            // Use sample data for demo/testing
+            const currentTime = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const fiveMinAgo = new Date(Date.now() - 5 * 60000).toISOString().replace('T', ' ').substring(0, 19);
+            
+            const sampleData = {
+                latest: {
+                    id: 2,
+                    temperature: (Math.random() * 5 + 20).toFixed(1),  // 20-25°C
+                    humidity: (Math.random() * 10 + 40).toFixed(1),    // 40-50%
+                    air_quality: (Math.random() * 15 + 80).toFixed(1), // 80-95%
+                    light_percent: Math.round(Math.random() * 30 + 60), // 60-90%
+                    lux: Math.round(Math.random() * 100 + 300),        // 300-400 lux
+                    timestamp: currentTime
+                },
+                oldest: {
+                    id: 1,
+                    temperature: (Math.random() * 5 + 20).toFixed(1),
+                    humidity: (Math.random() * 10 + 40).toFixed(1),
+                    air_quality: (Math.random() * 15 + 80).toFixed(1),
+                    light_percent: Math.round(Math.random() * 30 + 60),
+                    lux: Math.round(Math.random() * 100 + 300),
+                    timestamp: fiveMinAgo
+                }
+            };
+            
+            updateSensorDisplay(sampleData);
+            return false;
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Update the sensor display with fetched data
+    function updateSensorDisplay(data) {
+        if (!data || !data.latest) {
+            showNotification("Otrzymano nieprawidłowe dane z czujników", true);
+            return;
+        }
         
-        // Wykres ruchu
-        const ctx = document.createElement('canvas');
-        document.getElementById('motion-chart').appendChild(ctx);
+        const latestData = data.latest;
+        const oldestData = data.oldest || null;
+
+        // Update values
+        document.getElementById('temperature-value').textContent = `${latestData.temperature}°C`;
+        document.getElementById('humidity-value').textContent = `${latestData.humidity}%`;
+        document.getElementById('air-quality-value').textContent = `${latestData.air_quality}%`;
+        document.getElementById('light-value').textContent = `${latestData.light_percent}%`;
+
+        // Update trends if we have older data for comparison
+        if (oldestData) {
+            updateTrend(latestData.temperature, oldestData.temperature, document.getElementById('temperature-trend'));
+            updateTrend(latestData.humidity, oldestData.humidity, document.getElementById('humidity-trend'));
+            updateTrend(latestData.air_quality, oldestData.air_quality, document.getElementById('air-quality-trend'));
+            updateTrend(latestData.light_percent, oldestData.light_percent, document.getElementById('light-trend'));
+        } else {
+            document.getElementById('temperature-trend').textContent = 'Brak danych do porównania';
+            document.getElementById('humidity-trend').textContent = 'Brak danych do porównania';
+            document.getElementById('air-quality-trend').textContent = 'Brak danych do porównania';
+            document.getElementById('light-trend').textContent = 'Brak danych do porównania';
+        }
+
+        // Update last updated time
+        const timestamp = new Date(latestData.timestamp);
+        const timeStr = timestamp.toLocaleTimeString();
+        document.getElementById('security-status-text').textContent = `System aktywny (ostatnia aktualizacja: ${timeStr})`;
+    }
+
+    // Helper function to update trend indicators
+    function updateTrend(currentValue, previousValue, trendElement) {
+        const difference = (currentValue - previousValue).toFixed(1);
+        const absDifference = Math.abs(difference).toFixed(1);
         
-        new Chart(ctx, {
-            type: 'line',
+        if (difference > 0) {
+            trendElement.innerHTML = `<i class="fa-solid fa-arrow-up"></i> +${absDifference} od ostatniego pomiaru`;
+            trendElement.classList.remove('down');
+            trendElement.classList.add('up');
+        } else if (difference < 0) {
+            trendElement.innerHTML = `<i class="fa-solid fa-arrow-down"></i> -${absDifference} od ostatniego pomiaru`;
+            trendElement.classList.remove('up');
+            trendElement.classList.add('down');
+        } else {
+            trendElement.innerHTML = `<i class="fa-solid fa-equals"></i> Bez zmian`;
+            trendElement.classList.remove('up', 'down');
+        }
+    }
+
+    // Function to control servo motor
+    async function controlServo(angle) {
+        showLoading();
+        
+        try {
+            const response = await fetch('/api/control/servo', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ angle })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            deviceState.servoAngle = angle;
+            document.getElementById('current-servo-angle').textContent = `${angle}°`;
+            
+            // Update slider position
+            const slider = document.getElementById('servo-slider');
+            const fill = slider.querySelector('.slider-fill');
+            const thumb = slider.querySelector('.slider-thumb');
+            const percentage = (angle / 180) * 100;
+            
+            fill.style.width = `${percentage}%`;
+            thumb.style.left = `${percentage}%`;
+            
+            // Update button states
+            document.querySelectorAll('[data-servo]').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.servo) === angle);
+            });
+            
+            showNotification(`Servo ustawiono na ${angle}°`);
+            return true;
+            
+        } catch (error) {
+            console.error("Failed to control servo:", error);
+            showNotification("Błąd podczas sterowania serwomechanizmem", true);
+            return false;
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Function to control stepper motor
+    async function controlStepper(steps) {
+        showLoading();
+        
+        try {
+            const response = await fetch('/api/control/stepper', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ steps })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            deviceState.stepperPosition = steps;
+            document.getElementById('current-stepper-position').textContent = steps;
+            
+            // Update slider position
+            const slider = document.getElementById('stepper-slider');
+            const fill = slider.querySelector('.slider-fill');
+            const thumb = slider.querySelector('.slider-thumb');
+            const percentage = ((steps + 2048) / 4096) * 100;
+            
+            fill.style.width = `${percentage}%`;
+            thumb.style.left = `${percentage}%`;
+            
+            showNotification(`Silnik krokowy ustawiono na ${steps} kroków`);
+            return true;
+            
+        } catch (error) {
+            console.error("Failed to control stepper:", error);
+            showNotification("Błąd podczas sterowania silnikiem krokowym", true);
+            return false;
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Function to control buzzer
+    async function controlBuzzer(state) {
+        showLoading();
+        
+        try {
+            const response = await fetch('/api/control/buzzer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ state })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            deviceState.buzzerOn = state;
+            
+            // Update button states
+            document.getElementById('buzzer-on').classList.toggle('active', state);
+            document.getElementById('buzzer-off').classList.toggle('active', !state);
+            
+            showNotification(`Buzzer ${state ? 'włączony' : 'wyłączony'}`);
+            return true;
+            
+        } catch (error) {
+            console.error("Failed to control buzzer:", error);
+            showNotification("Błąd podczas sterowania buzzerem", true);
+            return false;
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Function to detect motion
+    async function checkMotion() {
+        try {
+            const response = await fetch('/api/sensors/motion');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.motion_detected) {
+                document.getElementById('motion-alert').classList.add('active');
+                deviceState.lastMotionTime = data.timestamp || new Date().toLocaleString();
+                document.getElementById('last-motion-time').textContent = `Ostatnia detekcja: ${deviceState.lastMotionTime}`;
+                
+                // Play alert sound if buzzer is enabled
+                if (deviceState.buzzerOn) {
+                    // In a real app, you might trigger the buzzer via API here
+                    console.log("Triggering alert sound");
+                }
+            } else {
+                document.getElementById('motion-alert').classList.remove('active');
+            }
+            
+            updateMotionChart(data.motion_history || generateSampleMotionData());
+            
+        } catch (error) {
+            console.error("Failed to check motion:", error);
+            // Use sample data for testing
+            const sampleData = generateSampleMotionData();
+            updateMotionChart(sampleData);
+        }
+    }
+
+    // Generate sample motion data for demo/testing
+    function generateSampleMotionData() {
+        const data = [];
+        const now = new Date();
+        
+        for (let i = 0; i < 24; i++) {
+            const time = new Date(now);
+            time.setHours(now.getHours() - i);
+            
+            data.push({
+                time: time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                value: Math.random() > 0.7 ? 1 : 0  // 30% chance of motion detection
+            });
+        }
+        
+        return data.reverse();
+    }
+
+    // Update motion detection chart
+    function updateMotionChart(data) {
+        const ctx = document.getElementById('motion-chart');
+        
+        // Destroy existing chart if it exists
+        if (window.motionChart) {
+            window.motionChart.destroy();
+        }
+        
+        // Create new chart
+        window.motionChart = new Chart(ctx, {
+            type: 'bar',
             data: {
-                labels: ['8:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                labels: data.map(d => d.time),
                 datasets: [{
-                    label: 'Detekcje ruchu',
-                    data: [2, 5, 1, 0, 3, 7],
-                    borderColor: '#ef476f',
-                    backgroundColor: 'rgba(239, 71, 111, 0.1)',
-                    tension: 0.4,
-                    fill: true
+                    label: 'Detekcja ruchu',
+                    data: data.map(d => d.value),
+                    backgroundColor: 'rgba(239, 71, 111, 0.7)',
+                    borderColor: 'rgba(239, 71, 111, 1)',
+                    borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        max: 1,
                         ticks: {
-                            stepSize: 1
+                            stepSize: 1,
+                            callback: function(value) {
+                                return value === 0 ? 'Brak' : 'Wykryto';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw === 1 ? 'Wykryto ruch' : 'Brak ruchu';
+                            }
                         }
                     }
                 }
             }
         });
-        
-        // Przyciski sterujące
-        const controlButtons = document.querySelectorAll('.control-btn');
-        
-        controlButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // Usunięcie klasy active z przycisków w tej samej grupie
-                const parentGroup = button.parentElement;
-                parentGroup.querySelectorAll('.control-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                
-                // Dodanie klasy active do klikniętego przycisku
-                button.classList.add('active');
-            });
+    }
+
+    // Initialize sliders
+    function initializeSliders() {
+        // Servo slider
+        const servoSlider = document.getElementById('servo-slider');
+        initializeSlider(servoSlider, 0, 180, deviceState.servoAngle, (value) => {
+            controlServo(value);
         });
         
-        // Obsługa zmiany sekcji (Dashboard/Użytkownicy)
-        const navLinks = document.querySelectorAll('.nav-link');
-        const sections = document.querySelectorAll('#dashboard-section, #users-section');
+        // Stepper slider
+        const stepperSlider = document.getElementById('stepper-slider');
+        initializeSlider(stepperSlider, -2048, 2048, deviceState.stepperPosition, (value) => {
+            controlStepper(value);
+        });
+    }
+
+    // Helper function to initialize a slider
+    function initializeSlider(slider, min, max, initialValue, onChangeCallback) {
+        const fill = slider.querySelector('.slider-fill');
+        const thumb = slider.querySelector('.slider-thumb');
+        const range = max - min;
         
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                
-                // Usunięcie klasy active ze wszystkich linków
-                navLinks.forEach(navLink => navLink.classList.remove('active'));
-                
-                // Dodanie klasy active do klikniętego linku
-                link.classList.add('active');
-                
-                // Ukrycie wszystkich sekcji
-                sections.forEach(section => section.style.display = 'none');
-                
-                // Wyświetlenie wybranej sekcji
-                const sectionId = link.getAttribute('data-section');
-                document.getElementById(sectionId).style.display = 'block';
-            });
+        // Initialize position
+        const initialPercentage = ((initialValue - min) / range) * 100;
+        fill.style.width = `${initialPercentage}%`;
+        thumb.style.left = `${initialPercentage}%`;
+        
+        // Add drag functionality
+        let isDragging = false;
+        
+        thumb.addEventListener('mousedown', () => {
+            isDragging = true;
         });
         
-        // Inicjalne wyświetlenie sekcji Dashboard
-        document.getElementById('dashboard-section').style.display = 'block';
-    </script>
+        slider.addEventListener('mousedown', (e) => {
+            updateSliderPosition(e);
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                updateSliderPosition(e);
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+            }
+        });
+        
+        function updateSliderPosition(e) {
+            const rect = slider.getBoundingClientRect();
+            let percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+            
+            fill.style.width = `${percentage}%`;
+            thumb.style.left = `${percentage}%`;
+            
+            // Calculate value based on percentage
+            const value = Math.round(min + (percentage / 100) * range);
+            onChangeCallback(value);
+        }
+    }
+
+    // Navigation functionality
+    document.querySelectorAll('.nav-link').forEach(navLink => {
+        navLink.addEventListener('click', () => {
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to clicked nav link
+            navLink.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show the corresponding section
+            const sectionId = navLink.getAttribute('data-section');
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+
+    // Event listeners for control buttons
+    document.querySelectorAll('[data-servo]').forEach(button => {
+        button.addEventListener('click', () => {
+            const angle = parseInt(button.dataset.servo);
+            controlServo(angle);
+        });
+    });
+
+    document.getElementById('buzzer-on').addEventListener('click', () => {
+        controlBuzzer(true);
+    });
+
+    document.getElementById('buzzer-off').addEventListener('click', () => {
+        controlBuzzer(false);
+    });
+
+    // Initialize application
+    async function initialize() {
+        showLoading();
+        
+        try {
+            // Fetch initial sensor data
+            await fetchSensorData();
+            
+            // Initialize sliders
+            initializeSliders();
+            
+            // Check motion detection
+            await checkMotion();
+            
+            // Set up polling for sensor data and motion detection
+            setInterval(fetchSensorData, 30000);  // Every 30 seconds
+            setInterval(checkMotion, 5000);       // Every 5 seconds
+            
+        } catch (error) {
+            console.error("Initialization error:", error);
+            showNotification("Błąd podczas inicjalizacji aplikacji", true);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Start the application when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', initialize);
+</script>
 </body>
 </html>
