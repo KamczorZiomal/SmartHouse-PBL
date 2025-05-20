@@ -196,4 +196,4 @@ Projekt został stworzony jako praca studencka w ramach zajęć na Akademii WSB.
 
 ---
 
-© 2025 Akademia WSB - Projekt Smart House. Wszelkie prawa zastrzeżone.
+© 2025 Autorzy projektu. Projekt studencki wykonany w ramach zajęć na Akademii WSB.
