@@ -9,4 +9,5 @@ class SensorData(db.Model):
     air_quality = db.Column(db.Float, nullable=False)
     light_percent = db.Column(db.Float, nullable=False)
     lux = db.Column(db.Integer, nullable=False)
+    motion_detected = db.Column(db.Boolean, nullable=False, default=False)
     timestamp = db.Column(db.DateTime, nullable=False)
