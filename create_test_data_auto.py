@@ -1,3 +1,5 @@
+# Kod odpowiedzialny za stworzenie testowej bazy danych
+
 import random
 import datetime
 from flask import Flask
@@ -8,6 +10,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sensors.db'
 db.init_app(app)
 
+
 def generate_random_sensor_data(num_entries=100):
     """Generate random sensor data entries."""
     data = []
@@ -16,15 +19,15 @@ def generate_random_sensor_data(num_entries=100):
 
     for i in range(num_entries):
         # Create timestamps at regular intervals
-        timestamp = start_time + datetime.timedelta(minutes=i*15)
+        timestamp = start_time + datetime.timedelta(minutes=i * 15)
 
         # Generate random sensor values within realistic ranges
         temperature = round(random.uniform(18.0, 28.0), 1)  # 18-28°C
-        humidity = round(random.uniform(30.0, 70.0), 1)     # 30-70%
+        humidity = round(random.uniform(30.0, 70.0), 1)  # 30-70%
         air_quality = round(random.uniform(0.0, 100.0), 1)  # 0-100 (arbitrary scale)
         light_percent = round(random.uniform(0.0, 100.0), 1)  # 0-100%
-        lux = int(random.uniform(0, 1000))                  # 0-1000 lux
-        motion_detected = random.choice([True, False])      # Random motion detection status
+        lux = int(random.uniform(0, 1000))  # 0-1000 lux
+        motion_detected = random.choice([True, False])  # Random motion detection status
 
         # Create a SensorData object
         sensor_data = SensorData(
@@ -39,6 +42,7 @@ def generate_random_sensor_data(num_entries=100):
         data.append(sensor_data)
 
     return data
+
 
 def main():
     """Main function to create and populate the database."""
@@ -73,6 +77,7 @@ def main():
 
         print(f"Successfully added {len(test_data)} test data entries to the database.")
         print("Database is ready for testing!")
+
 
 if __name__ == "__main__":
     main()
