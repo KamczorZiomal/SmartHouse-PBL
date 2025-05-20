@@ -6,13 +6,15 @@
 #include <BH1750.h>         // Biblioteka do obsługi czujnika natężenia światła
 #include <limits.h>         // Biblioteka z definicjami limitów typów danych
 #include <Servo.h>          // Biblioteka do obsługi serwo SG90
-#include <Stepper.h>        // Biblioteka do obsługi silnika krokowego 28BYJ-48  
+#include <Stepper.h>        // Biblioteka do obsługi silnika krokowego 28BYJ-48
+#include <String.h>         // Biblioteka do obsługi łańcuchów znaków
 
 // Definicje pinów - tutaj podłączamy nasze czujniki i elementy wykonawcze
 #define DHT_DATA_PIN 2        // Pin danych DHT22 - mierzy temperaturę i wilgotność
 #define PIR_PIN 3             // Pin czujnika ruchu HC-SR501 - wykrywa ruch
 #define MQ135_A0_PIN A2       // Pin analogowy A2 dla MQ135 - czujnik jakości powietrza
 #define BUZZER_PIN 53         // Pin dla buzzera KY-012 - sygnał dźwiękowy
+#define SSR_RELAY_PIN 22      // Pin dla przekaźnika SSR do sterowania LEDami
 #define SERVO_PIN 9           // Pin dla serwa SG90 - silnik sterujący
 // Piny dla silnika krokowego 28BYJ-48
 #define IN1 30    // Piny sterujące poszczególnymi cewkami silnika krokowego
@@ -34,7 +36,7 @@ DHT dht(DHT_DATA_PIN, DHT22);       // Czujnik temperatury i wilgotności
 MQ135 gasSensor(MQ135_A0_PIN);      // Czujnik zanieczyszczeń powietrza
 BH1750 lightMeter;                  // Czujnik natężenia światła
 
-// Inicjalizacja serwa i silnika krokowego - choć nie będziemy ich aktywnie używać w tej wersji
+// Inicjalizacja serwo i silnika krokowego - choć nie będziemy ich aktywnie używać w tej wersji
 Servo sg90;                         // Serwo SG90
 const int STEPS_PER_REV = 2048;     // Silnik krokowy 28BYJ-48 ma 2048 kroków na pełny obrót (z przekładnią)
 Stepper stepper(STEPS_PER_REV, IN1, IN2, IN3, IN4);
@@ -46,16 +48,18 @@ float airQuality = 0.0;     // Jakość powietrza (wartość surowa)
 float lightLevel = 0.0;     // Natężenie światła w luksach
 int dhtErrorCount = 0;      // Licznik błędów odczytu z DHT22
 bool mqCalibrated = false;  // Flaga kalibracji czujnika MQ135
-bool buzzerTesting = false; // Flaga testowania buzzera (bez włączania dźwięku)
-
-// Stałe do porównywania - progi dla różnych wartości czujników
-#define LIGHT_THRESHOLD 100        // Próg natężenia światła (lux)
-#define AIR_QUALITY_THRESHOLD 20   // Próg jakości powietrza (%, poniżej tej wartości)
 
 // Zmienne dla czujnika ruchu
 bool motionDetected = false;       // Flaga wykrycia ruchu
 unsigned long lastMotionTime = 0;  // Czas ostatniego wykrycia ruchu
 unsigned long lastDisplayUpdateTime = 0;  // Czas ostatniej aktualizacji wyświetlacza
+
+// Zmienne do śledzenia stanu urządzeń
+int servoPosition = 0;       // Śledzenie aktualnej pozycji serwo
+
+// Zmienne do obsługi komend przez Serial
+String incomingCommand = "";      // Przechowuje otrzymaną komendę
+bool commandComplete = false;     // Flaga informująca o kompletności komendy
 
 // Stałe czasowe - określają jak często aktualizować różne elementy
 const unsigned long debounceTime = 500;     // Czas debouncingu w milisekundach (eliminacja drgań styków)
@@ -81,15 +85,6 @@ void readMotion() {
     if (getTimeDifference(currentTime, lastMotionTime) > debounceTime) {
       motionDetected = currentPinState;
       lastMotionTime = currentTime;
-      
-      // Wyświetl odpowiedni komunikat w zależności od wykrycia ruchu
-      if (motionDetected) {
-        // Serial.println(F("Ruch: WYKRYTO"));
-        buzzerTesting = true;  // Symulacja sprawdzania buzzera, bez faktycznego włączania
-      } else {
-        // Serial.println(F("Ruch: BRAK"));
-        buzzerTesting = false;
-      }
     }
   }
   
@@ -98,7 +93,6 @@ void readMotion() {
   unsigned long currentTime = millis();
   if (motionDetected && getTimeDifference(currentTime, lastMotionTime) > motionResetTime) {
     motionDetected = false;
-    buzzerTesting = false;
     // Serial.println(F("Ruch: BRAK (automatyczny reset po czasie)"));
   }
 }
@@ -131,6 +125,104 @@ void showASCIIArt() {
   delay(2000);  // Pokazujemy ekran powitalny przez 2 sekundy
 }
 
+// Funkcja serwoTest - sprawdza poprawne działanie serwo wykonując pełny ruch testowy
+void servoTest() {
+  Serial.println(F("Test serwo SG90:"));
+  
+  // Ruch w pełnym zakresie od 0 do 180 i z powrotem
+  for (int angle = 0; angle <= 180; angle += 45) {
+    sg90.write(angle);
+    servoPosition = angle;
+    Serial.print(F("Serwo w pozycji: "));
+    Serial.print(angle);
+    Serial.println(F(" stopni"));
+    delay(300);
+  }
+
+  // Powrót do pozycji 0
+  sg90.write(0);
+  servoPosition = 0;
+  Serial.println(F("Serwo powróciło do pozycji 0 stopni"));
+  delay(300);
+}
+
+// Funkcja do obsługi komend przychodzących przez Serial
+void processCommand() {
+  // Komenda powinna być już kompletna (zakończona znakiem nowej linii, który został usunięty)
+  incomingCommand.trim();  // Usuwamy ewentualne białe znaki z początku i końca
+  
+  Serial.print(F("Otrzymano komendę: "));
+  Serial.println(incomingCommand);
+  
+  // Sprawdzamy rodzaj komendy i odpowiednio reagujemy
+  if (incomingCommand.equals("LED_ON")) {
+    digitalWrite(SSR_RELAY_PIN, HIGH);
+    Serial.println(F("Włączono LEDy"));
+  } 
+  else if (incomingCommand.equals("LED_OFF")) {
+    digitalWrite(SSR_RELAY_PIN, LOW);
+    Serial.println(F("Wyłączono LEDy"));
+  }
+  else if (incomingCommand.equals("BUZZER_ON")) {
+    digitalWrite(BUZZER_PIN, HIGH);
+    Serial.println(F("Włączono buzzer"));
+  }
+  else if (incomingCommand.equals("BUZZER_OFF")) {
+    digitalWrite(BUZZER_PIN, LOW);
+    Serial.println(F("Wyłączono buzzer"));
+  }
+  else if (incomingCommand.equals("SG90_0")) {  // NOWA KOMENDA: Powrót serwo do pozycji 0 stopni
+    sg90.write(0);
+    servoPosition = 0;
+    Serial.println(F("Obrócono serwo do pozycji 0 stopni (pozycja początkowa)"));
+  }
+  else if (incomingCommand.equals("SG90_1")) {
+    sg90.write(90);  // Obracamy serwo o 90 stopni
+    servoPosition = 90;
+    Serial.println(F("Obrócono serwo do pozycji 90 stopni"));
+  }
+  else if (incomingCommand.equals("SG90_2")) {
+    sg90.write(180);  // Obracamy serwo o 180 stopni
+    servoPosition = 180;
+    Serial.println(F("Obrócono serwo do pozycji 180 stopni"));
+  }
+  else if (incomingCommand.startsWith("SG90_")) {  // NOWA FUNKCJA: Obsługa dowolnego kąta serwo
+    // Pobieranie wartości kąta z komendy, np. SG90_45 ustawi serwo na 45 stopni
+    int angle = incomingCommand.substring(5).toInt();
+    
+    // Sprawdzanie czy kąt jest w poprawnym zakresie
+    if (angle >= 0 && angle <= 180) {
+      sg90.write(angle);
+      servoPosition = angle;
+      Serial.print(F("Obrócono serwo do pozycji "));
+      Serial.print(angle);
+      Serial.println(F(" stopni"));
+    } else {
+      Serial.println(F("Błąd: Kąt poza zakresem (0-180 stopni)"));
+    }
+  }
+  else if (incomingCommand.equals("Silnik_ruch")) {
+    // Obracamy silnik krokowy o 500 kroków w prawo
+    stepper.step(500);
+    Serial.println(F("Wykonano 500 kroków silnikiem w prawo"));
+  }
+  else if (incomingCommand.equals("Silnik_lewo")) {  // NOWA KOMENDA: Obrót silnika w lewo
+    // Obracamy silnik krokowy o 500 kroków w lewo
+    stepper.step(-500);
+    Serial.println(F("Wykonano 500 kroków silnikiem w lewo"));
+  }
+  else if (incomingCommand.equals("SERWO_TEST")) {  // NOWA KOMENDA: Test serwo
+    servoTest();
+  }
+  else {
+    Serial.println(F("Nieznana komenda"));
+  }
+  
+  // Czyszczenie komendy po przetworzeniu
+  incomingCommand = "";
+  commandComplete = false;
+}
+
 // Funkcja do rysowania paska postępu - używana podczas inicjalizacji
 // Pasek postępu pokazuje jak daleko zaawansowana jest inicjalizacja systemu
 void drawProgressBar(int x, int y, int width, int height, int progress) {
@@ -141,6 +233,20 @@ void drawProgressBar(int x, int y, int width, int height, int progress) {
   int fillWidth = (progress * (width - 4)) / 100;
   display.fillRect(x + 2, y + 2, fillWidth, height - 4, SSD1306_WHITE);
   display.display();
+}
+
+// Funkcja do testowania buzzera przy starcie
+void testBuzzer() {
+  // Krótki sygnał - sprawdzenie czy buzzer działa
+  digitalWrite(BUZZER_PIN, HIGH);
+  delay(200);
+  digitalWrite(BUZZER_PIN, LOW);
+  delay(200);
+  digitalWrite(BUZZER_PIN, HIGH);
+  delay(200);
+  digitalWrite(BUZZER_PIN, LOW);
+  
+  // Serial.println(F("Test buzzera wykonany"));
 }
 
 // Funkcja do inicjalizacji wszystkich czujników z paskiem postępu
@@ -183,20 +289,32 @@ void initSensors() {
   drawProgressBar(10, 30, 108, 10, 75);
   sg90.attach(SERVO_PIN);
   sg90.write(0);  // Ustaw serwo w pozycji początkowej
-  // Serial.println(F("Serwo SG90 zainicjalizowane - nie będzie aktywnie używane w tej wersji"));
+  servoPosition = 0;  // Zapisz pozycję początkową serwo
   delay(500);
   
-  // Inicjalizacja silnika krokowego - 90% postępu
-  drawProgressBar(10, 30, 108, 10, 90);
+  // Inicjalizacja silnika krokowego - 85% postępu
+  drawProgressBar(10, 30, 108, 10, 85);
   stepper.setSpeed(10);  // RPM (obroty na minutę)
   // Serial.println(F("Silnik krokowy 28BYJ-48 zainicjalizowany - nie będzie aktywnie używany w tej wersji"));
   delay(500);
   
-  // Inicjalizacja buzzera - 100% postępu
-  drawProgressBar(10, 30, 108, 10, 100);
+  // Inicjalizacja przekaźnika SSR - 90% postępu
+  drawProgressBar(10, 30, 108, 10, 90);
+  pinMode(SSR_RELAY_PIN, OUTPUT);
+  digitalWrite(SSR_RELAY_PIN, HIGH);  // Włączenie przekaźnika przy starcie
+  // Serial.println(F("Przekaźnik SSR zainicjalizowany - steruje LEDami"));
+  delay(500);
+  
+  // Inicjalizacja buzzera - 95% postępu
+  drawProgressBar(10, 30, 108, 10, 95);
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);  // Wyłączenie buzzera na początku
-  // Serial.println(F("Pin buzzera zainicjalizowany - symulacja alarmu bez dźwięku"));
+  // Serial.println(F("Pin buzzera zainicjalizowany"));
+  delay(500);
+  
+  // Test buzzera - 100% postępu
+  drawProgressBar(10, 30, 108, 10, 100);
+  testBuzzer();
   delay(500);
   
   // Informacja o zakończeniu inicjalizacji
@@ -206,46 +324,7 @@ void initSensors() {
   delay(1000);
 }
 
-// Funkcja do sprawdzania potencjalnego alarmu (bez faktycznego włączania dźwięku)
-// Ta funkcja sprawdza warunki, które normalnie aktywowałyby alarm, ale nie włącza go
-void checkAlarmConditions() {
-  // Pobierz procent jakości powietrza
-  int airQualityPercent = calculateAirQualityPercent();
-  
-  // Sprawdź warunki alarmu (te same co wcześniej miały aktywować buzzer)
-  bool lightTrigger = (lightLevel > LIGHT_THRESHOLD);
-  bool airTrigger = (airQualityPercent < AIR_QUALITY_THRESHOLD);  // Poniżej progu
-  bool motionTrigger = motionDetected && (digitalRead(PIR_PIN) == HIGH);
-  
-  bool shouldActivateAlarm = lightTrigger || airTrigger || motionTrigger;
-  
-  // Wyświetlamy szczegółowe informacje w terminalu
-  // Serial.println(F("Sprawdzenie warunków alarmu:"));
-  // Serial.print(F("- Światło: "));
-  // Serial.print(lightLevel);
-  // Serial.print(F(" lux (próg: "));
-  // Serial.print(LIGHT_THRESHOLD);
-  // Serial.print(F("): "));
-  // Serial.println(lightTrigger ? F("PRZEKROCZONY") : F("W NORMIE"));
-  
-  // Serial.print(F("- Jakość powietrza: "));
-  // Serial.print(airQualityPercent);
-  // Serial.print(F("% (próg: <"));
-  // Serial.print(AIR_QUALITY_THRESHOLD);
-  // Serial.print(F("%): "));
-  // Serial.println(airTrigger ? F("PONIŻEJ NORMY") : F("W NORMIE"));
-  
-  // Serial.print(F("- Ruch: "));
-  // Serial.println(motionTrigger ? F("WYKRYTY") : F("BRAK"));
-  
-  // Serial.print(F("Alarm powinien być: "));
-  // Serial.println(shouldActivateAlarm ? F("AKTYWNY") : F("NIEAKTYWNY"));
-  
-  // Aktualizujemy flagę symulacji buzzera
-  buzzerTesting = shouldActivateAlarm;
-}
-
-// Funkcja - przelicza jakość powietrza na procenty
+// Przelicza jakość powietrza na procenty
 // Konwertuje surowe odczyty na wartość procentową dla łatwiejszego zrozumienia
 int calculateAirQualityPercent() {
   // Ustalamy nowy zakres dla pełnej skali 0-100%
@@ -362,13 +441,15 @@ void updateDisplay() {
   bool motionConfirmed = motionDetected && (digitalRead(PIR_PIN) == HIGH);
   display.println(motionConfirmed ? F("WYKRYTO!") : F("BRAK"));
   
-  // Status sprawdzania alarmu (symulacja)
+  // Status przekaźnika SSR
   display.setCursor(0, 50);
-  if (buzzerTesting) {
-    display.println(F("Status: ALARM (bez dzwieku)"));
-  } else {
-    display.println(F("Status: Monitoring"));
-  }
+  display.print(F("LEDy: "));
+  display.print(digitalRead(SSR_RELAY_PIN) == HIGH ? F("WLACZONE") : F("WYLACZONE"));
+  
+  // Dodajemy informację o aktualnej pozycji serwo
+  display.setCursor(90, 50);
+  display.print(F("SG90:"));
+  display.print(servoPosition);
   
   display.display();
 }
@@ -378,6 +459,9 @@ void setup() {
   Serial.begin(9600);
   // Serial.println(F("Inicjalizacja systemu wieloczujnikowego Smart House..."));
   // Serial.println(F("Projekt studencki dla Akademii WSB"));
+  
+  // Przygotowanie zmiennych do odbierania komend
+  incomingCommand.reserve(32);  // Rezerwujemy pamięć na komendy (max 32 znaki)
   
   // Konfiguracja pinów dla silnika krokowego - ustawiamy jako wyjścia
   pinMode(IN1, OUTPUT);
@@ -394,8 +478,11 @@ void setup() {
   // Pokaż ekran powitalny
   showASCIIArt();
   
-  // Inicjalizacja wszystkich czujników z paskiem postępu
+  // Inicjalizacja wszystkich czujników z paskiem postępu i testem buzzera
   initSensors();
+  
+  // Testowy ruch serwo - sprawdza czy działa prawidłowo
+  servoTest();
   
   // Serial.println(F("Stabilizacja czujnika ruchu (60 sekund)..."));
   // Serial.println(F("Ten czas jest potrzebny, aby czujnik PIR ustabilizował swoje odczyty"));
@@ -427,8 +514,23 @@ void loop() {
   // Odczyt danych ze wszystkich czujników
   readSensors();
   
-  // Sprawdzanie warunków alarmu (bez włączania dźwięku)
-  checkAlarmConditions();
+  // Sprawdzanie, czy są dostępne dane w porcie szeregowym
+  while (Serial.available()) {
+    char inChar = (char)Serial.read();
+    
+    // Jeśli otrzymano znak nowej linii, oznacza to koniec komendy
+    if (inChar == '\n') {
+      commandComplete = true;
+    } else {
+      // W przeciwnym razie dodajemy znak do komendy
+      incomingCommand += inChar;
+    }
+  }
+  
+  // Jeśli komenda jest kompletna, przetwórz ją
+  if (commandComplete) {
+    processCommand();
+  }
   
   // Aktualizacja wyświetlacza - wykonujemy co określony czas dla płynności
   unsigned long currentTime = millis();
@@ -465,8 +567,21 @@ void loop() {
     Serial.println(F("NIE - brak ruchu"));
   }
   
-  Serial.print(F("Status systemu: "));
-  Serial.println(buzzerTesting ? F("WYKRYTO WARUNKI ALARMU (bez dźwięku)") : F("NORMALNY MONITORING"));
+  Serial.print(F("Status przekaźnika SSR (LEDy): "));
+  Serial.println(digitalRead(SSR_RELAY_PIN) == HIGH ? F("WŁĄCZONY") : F("WYŁĄCZONY"));
+  
+  Serial.print(F("Status buzzera: "));
+  Serial.println(digitalRead(BUZZER_PIN) == HIGH ? F("WŁĄCZONY") : F("WYŁĄCZONY"));
+  
+  Serial.println(F("======================================"));
+  Serial.println(F("Dostępne komendy:"));
+  Serial.println(F("LED_ON - włączenie LEDów"));
+  Serial.println(F("LED_OFF - wyłączenie LEDów"));
+  Serial.println(F("BUZZER_ON - włączenie buzzera"));
+  Serial.println(F("BUZZER_OFF - wyłączenie buzzera"));
+  Serial.println(F("SG90_1 - obrót serwo o 90 stopni"));
+  Serial.println(F("SG90_2 - obrót serwo o 180 stopni"));
+  Serial.println(F("Silnik_ruch - obrót silnika krokowego o 50 kroków"));
   Serial.println(F("======================================"));
   
   // Opóźnienie dla stabilności systemu i czytelności danych
