@@ -33,7 +33,7 @@ Do zbudowania systemu potrzebne są następujące komponenty:
 - HC-SR501 (PIR) - czujnik ruchu
 
 ### Elementy wykonawcze:
-- Przekaźnik SSR - do sterowania LEDami
+- MOSFET IRFZ44N - do sterowania LEDami
 - Serwo SG90 - silnik sterujący
 - Silnik krokowy 28BYJ-48 z modułem sterownika ULN2003
 - Buzzer KY-012 - sygnalizator dźwiękowy
@@ -46,8 +46,8 @@ Do zbudowania systemu potrzebne są następujące komponenty:
 
 ### Dodatkowe elementy:
 - Kable połączeniowe
-- Płytka stykowa (breadboard)
-- Zasilacz 5V DC
+- Płytki stykowe
+- Zasilacz 12V DC
 
 ## 🔌 Schemat połączeń
 
@@ -56,23 +56,28 @@ Do zbudowania systemu potrzebne są następujące komponenty:
 - **Pin 3**: PIR (czujnik ruchu)
 - **Pin A2**: MQ135 (wyjście analogowe)
 - **Pin 53**: Buzzer
-- **Pin 22**: Przekaźnik SSR (sterowanie LEDami)
+- **Pin 22**: MOSFET IRFZ44N (sterowanie LEDami)
 - **Pin 9**: Serwo SG90
 - **Piny 30-33**: Silnik krokowy 28BYJ-48 (IN1-IN4)
 - **Piny SDA/SCL**: Wyświetlacz OLED SSD1306 i BH1750 (I2C)
+
+### Schemat graficzny:
+
+![image](https://github.com/user-attachments/assets/f26600e6-63f5-4810-8ac6-7f70de848ec2)
+
 
 ## 💻 Instalacja
 
 ### Wymagane biblioteki:
 Przed wgraniem kodu należy zainstalować następujące biblioteki:
-- DHT - do obsługi czujnika temperatury i wilgotności
-- Wire - do komunikacji I2C (wbudowana w Arduino IDE)
-- Adafruit_GFX - biblioteka graficzna
-- Adafruit_SSD1306 - obsługa wyświetlacza OLED
-- MQ135 - obsługa czujnika jakości powietrza
-- BH1750 - obsługa czujnika natężenia światła
-- Servo - obsługa serwo (wbudowana w Arduino IDE)
-- Stepper - obsługa silnika krokowego (wbudowana w Arduino IDE)
+- **DHT.h** (by Adafruit) - do obsługi czujnika temperatury i wilgotności DHT22
+- **Wire.h** - do komunikacji I2C (wbudowana w Arduino IDE)
+- **Adafruit_GFX.h** - biblioteka graficzna dla wyświetlaczy
+- **Adafruit_SSD1306.h** - obsługa wyświetlacza OLED SSD1306
+- **MQ135.h** (by GeorgK) - obsługa czujnika jakości powietrza MQ135
+- **BH1750.h** (by Christopher Laws) - obsługa czujnika natężenia światła BH1750
+- **Servo.h** - obsługa serwomechanizmu SG90 (wbudowana w Arduino IDE)
+- **Stepper.h** - obsługa silnika krokowego 28BYJ-48 (wbudowana w Arduino IDE)
 
 ### Procedura instalacji:
 1. Zainstaluj Arduino IDE ze strony [arduino.cc](https://www.arduino.cc/en/software)
@@ -81,7 +86,7 @@ Przed wgraniem kodu należy zainstalować następujące biblioteki:
 4. Podłącz Arduino do komputera za pomocą kabla USB
 5. Wybierz odpowiednią płytkę (Arduino Mega 2560) i port COM
 6. Wgraj kod do Arduino
-7. Otwórz Monitor Portu Szeregowego (115200 baud) do obserwacji danych i wysyłania komend
+7. Otwórz Monitor Portu Szeregowego (9600 baud) do obserwacji danych i wysyłania komend
 
 ## 🎮 Instrukcja obsługi
 
@@ -151,6 +156,11 @@ System można sterować poprzez wysyłanie komend przez Monitor Portu Szeregoweg
 - Wysyłanie szczegółowych raportów przez port szeregowy
 
 ## 🔧 Rozwiązywanie problemów
+
+### Problem: Zawieszający się pasek led / nie przestaje świecić
+**Rozwiązanie**: 
+- Upewnij się, że rezystor podciągający (10kΩ) jest podłączony między bramką (gate) a źródłem (source) Mosfeta (zapewni to stabilny stan niski, gdy Arduino nie podaje sygnału, co zapobiega zawieszaniu się tranzystora)
+- Zrestartuj Arduino
 
 ### Problem: Brak danych z czujnika DHT22
 **Rozwiązanie**: 
