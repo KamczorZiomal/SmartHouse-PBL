@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Smart House - Sterowanie</title>
+<link rel="stylesheet" href="style.css" />
+<script>
+// Funkcje symulujące odczyt czujników
+function odswiezDane() {
+    document.getElementById('temperatura').innerText = (20 + Math.random() * 10).toFixed(1) + " °C";
+    document.getElementById('wilgotnosc').innerText = (40 + Math.random() * 20).toFixed(1) + " %";
+    document.getElementById('jakość').innerText = Math.floor(80 + Math.random() * 20) + " %";
+    document.getElementById('naswietlenie').innerText = Math.floor(50 + Math.random() * 50) + " %";
+    document.getElementById('ruch').innerText = Math.random() > 0.5 ? "WYKRYTO" : "BRAK";
+    document.getElementById('status').innerText = Math.random() > 0.1 ? "Monitoring" : "ALARM";
+}
+
+function sterujSerwo(kat) { alert("Ustaw kąt serwa na: " + kat + "°"); }
+function włączBuzzer() { alert("Buzzer WŁĄCZONY"); }
+function wyłączBuzzer() { alert("Buzzer WYŁĄCZONY"); }
+
+setInterval(odswiezDane, 3000);
+window.onload = odswiezDane;
+</script>
+</head>
+<body>
+<h1>Smart House - Sterowanie</h1>
+
+<div class="section">
+<h2>Odczyty Czujników</h2>
+<div class="sensor">Temperatura: <span id="temperatura">--</span></div>
+<div class="sensor">Wilgotność: <span id="wilgotnosc">--</span></div>
+<div class="sensor">Jakość tlenu: <span id="jakość">--</span></div>
+<div class="sensor">Naświetlenie: <span id="naswietlenie">--</span></div>
+<div class="sensor">Ruch: <span id="ruch">--</span></div>
+<div class="sensor">Status: <span id="status">--</span></div>
+</div>
+
+<div class="section">
+<h2>Sterowanie serwem</h2>
+<div class="buttons">
+<button onclick="sterujSerwo(0)">Serwo 0°</button>
+<button onclick="sterujSerwo(90)">Serwo 90°</button>
+<button onclick="sterujSerwo(180)">Serwo 180°</button>
+</div>
+</div>
+
+<div class="section">
+<h2>Buzzer</h2>
+<div class="buttons">
+<button onclick="włączBuzzer()">Włącz Buzzer</button>
+<button onclick="wyłączBuzzer()">Wyłącz Buzzer</button>
+</div>
+</div>
+
+</body>
+</html>
