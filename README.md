@@ -1,4 +1,5 @@
-![wizualizacje\sterowanie v2.png]
+![sterowaniev2](https://github.com/user-attachments/assets/0042981f-a723-418d-9e5e-0d5e5594d13b)
+
 # Odczyt z bazy danych i wysyłka przez port szeregowy
 
 ## Wymagania
