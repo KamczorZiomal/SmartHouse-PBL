@@ -1,4 +1,4 @@
-![wizualizacje\sterowanie.png]
+![wizualizacje\sterowanie v2.png]
 # Odczyt z bazy danych i wysyłka przez port szeregowy
 
 ## Wymagania
