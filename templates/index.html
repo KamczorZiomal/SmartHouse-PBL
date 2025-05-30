@@ -667,6 +667,15 @@
 
                     <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
 
+                    <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-lightbulb" style="color: var(--primary);"></i> Kontrola Taśmy LED</h3>
+
+                    <div class="button-group">
+                        <button class="control-btn" id="led-on">Włącz Światło</button>
+                        <button class="control-btn active" id="led-off">Wyłącz Światło</button>
+                    </div>
+
+                    <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
+
                     <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-volume-high" style="color: var(--primary);"></i> Kontrola Buzzera</h3>
 
                     <div class="button-group">
@@ -1272,6 +1281,67 @@
     document.getElementById('buzzer-off').addEventListener('click', () => {
         controlBuzzer(false);
     });
+
+    // Stepper motor control
+    document.querySelectorAll('.control-btn[data-stepper]').forEach(button => {
+        button.addEventListener('click', async function() {
+            const rpm = this.dataset.stepper;
+            const buttons = this.parentElement.querySelectorAll('.control-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            try {
+                const response = await fetch('/api/control/stepper', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ rpm: parseInt(rpm) })
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    showNotification(data.message || 'Błąd sterowania silnikiem', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Błąd komunikacji z serwerem', 'error');
+            }
+        });
+    });
+
+    // LED strip control
+    const ledOnBtn = document.getElementById('led-on');
+    const ledOffBtn = document.getElementById('led-off');
+
+    async function controlLed(state) {
+        try {
+            const response = await fetch('/api/control/led', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ state: state })
+            });
+            const data = await response.json();
+            if (data.success) {
+                if (state === 'on') {
+                    ledOnBtn.classList.add('active');
+                    ledOffBtn.classList.remove('active');
+                } else {
+                    ledOnBtn.classList.remove('active');
+                    ledOffBtn.classList.add('active');
+                }
+            } else {
+                showNotification(data.message || 'Błąd sterowania taśmą LED', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Błąd komunikacji z serwerem', 'error');
+        }
+    }
+
+    ledOnBtn.addEventListener('click', () => controlLed('on'));
+    ledOffBtn.addEventListener('click', () => controlLed('off'));
 
     // Initialize application
     async function initialize() {

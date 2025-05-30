@@ -207,6 +207,27 @@ def control_stepper():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/control/led', methods=['POST'])
+def control_led():
+    if not serial_available:
+        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+
+    try:
+        data = request.json
+        state = data.get('state', False)
+
+        # Send command to Arduino via socket
+        command = b'LED_ON\n' if state else b'LED_OFF\n'
+        success, response = send_command_to_serial(command)
+
+        if not success:
+            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+
+        return jsonify({'success': True, 'message': f'LED strip turned {"ON" if state else "OFF"}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
