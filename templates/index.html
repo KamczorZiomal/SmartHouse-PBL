@@ -637,25 +637,16 @@
                         <div class="current-value">Aktualny kąt: <span id="current-servo-angle">90°</span></div>
                     </div>
 
-                    <div class="slider-control">
-                        <label>Silnik Krokowy 28BYJ-48 (Kroki)</label>
-                        <div class="slider-container">
-                            <span class="slider-value">-2048</span>
-                            <div class="slider" id="stepper-slider">
-                                <div class="slider-fill"></div>
-                                <div class="slider-thumb"></div>
-                            </div>
-                            <span class="slider-value">2048</span>
-                        </div>
-                        <div class="current-value">Aktualna pozycja: <span id="current-stepper-position">0</span> kroków
-                        </div>
-                    </div>
 
                     <div class="button-group">
                         <button class="control-btn" data-servo="0">Serwo 0°</button>
                         <button class="control-btn active" data-servo="90">Serwo 90°</button>
                         <button class="control-btn" data-servo="180">Serwo 180°</button>
                     </div>
+
+                    <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
+
+                    <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-volume-high" style="color: var(--primary);"></i> Kontrola Buzzera</h3>
 
                     <div class="button-group">
                         <button class="control-btn" id="buzzer-on">Włącz Buzzer</button>
@@ -760,10 +751,10 @@
     // Global variables for device state
     const deviceState = {
         servoAngle: 90,
-        stepperPosition: 0,
         buzzerOn: false,
         securityActive: true,
-        lastMotionTime: "Brak detekcji"
+        lastMotionTime: "Brak detekcji",
+        previousMotionState: false
     };
 
     // Loading overlay functions
@@ -943,47 +934,6 @@
         }
     }
 
-    // Function to control stepper motor
-    async function controlStepper(steps) {
-        showLoading();
-
-        try {
-            const response = await fetch('/api/control/stepper', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({steps})
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            deviceState.stepperPosition = steps;
-            document.getElementById('current-stepper-position').textContent = steps;
-
-            // Update slider position
-            const slider = document.getElementById('stepper-slider');
-            const fill = slider.querySelector('.slider-fill');
-            const thumb = slider.querySelector('.slider-thumb');
-            const percentage = ((steps + 2048) / 4096) * 100;
-
-            fill.style.width = `${percentage}%`;
-            thumb.style.left = `${percentage}%`;
-
-            showNotification(`Silnik krokowy ustawiono na ${steps} kroków`);
-            return true;
-
-        } catch (error) {
-            console.error("Failed to control stepper:", error);
-            showNotification("Błąd podczas sterowania silnikiem krokowym", true);
-            return false;
-        } finally {
-            hideLoading();
-        }
-    }
 
     // Function to control buzzer
     async function controlBuzzer(state) {
@@ -1032,19 +982,40 @@
 
             const data = await response.json();
 
+            // Check if motion was just detected (current state is true)
             if (data.motion_detected) {
+                // Update UI to show motion detected
                 document.getElementById('motion-alert').classList.add('active');
                 deviceState.lastMotionTime = data.timestamp || new Date().toLocaleString();
                 document.getElementById('last-motion-time').textContent = `Ostatnia detekcja: ${deviceState.lastMotionTime}`;
 
-                // Play alert sound if buzzer is enabled
-                if (deviceState.buzzerOn) {
-                    // In a real app, you might trigger the buzzer via API here
-                    console.log("Triggering alert sound");
+                // Check if this is a new motion detection (previous state was false)
+                if (!deviceState.previousMotionState) {
+                    console.log("New motion detected! Triggering buzzer for 1 second");
+
+                    // Call the new endpoint to trigger the buzzer for 1 second
+                    try {
+                        const buzzerResponse = await fetch('/api/motion/detected', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({})
+                        });
+
+                        if (!buzzerResponse.ok) {
+                            console.error("Failed to trigger buzzer:", buzzerResponse.statusText);
+                        }
+                    } catch (buzzerError) {
+                        console.error("Error triggering buzzer:", buzzerError);
+                    }
                 }
             } else {
                 document.getElementById('motion-alert').classList.remove('active');
             }
+
+            // Store current motion state for next comparison
+            deviceState.previousMotionState = data.motion_detected;
 
             updateMotionChart(data.motion_history || generateSampleMotionData());
 
@@ -1135,11 +1106,6 @@
             controlServo(value);
         });
 
-        // Stepper slider
-        const stepperSlider = document.getElementById('stepper-slider');
-        initializeSlider(stepperSlider, -2048, 2048, deviceState.stepperPosition, (value) => {
-            controlStepper(value);
-        });
     }
 
     // Helper function to initialize a slider

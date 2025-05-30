@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="sensors" uuid="665c1c57-d921-4c86-9ad1-3722699db175">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>820c78e6-a954-4166-b931-5fa790646f30</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:C:\Users\bakso\PycharmProjects\SmartHome\instance\sensors.db</jdbc-url>

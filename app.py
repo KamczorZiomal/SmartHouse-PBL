@@ -102,6 +102,37 @@ def get_motion():
 
     return jsonify(result)
 
+@app.route('/api/motion/detected', methods=['POST'])
+def motion_detected():
+    """
+    Endpoint to handle motion detection events.
+    When motion is detected, this endpoint will trigger the buzzer for 1 second.
+    """
+    if not serial_available:
+        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+
+    try:
+        # Turn buzzer on
+        success_on, response_on = send_command_to_serial(b'BUZZER_ON\n')
+        if not success_on:
+            return jsonify({'success': False, 'message': f'Failed to turn buzzer on: {response_on}'}), 500
+
+        # Wait for 1 second
+        import time
+        time.sleep(1)
+
+        # Turn buzzer off
+        success_off, response_off = send_command_to_serial(b'BUZZER_OFF\n')
+        if not success_off:
+            return jsonify({'success': False, 'message': f'Failed to turn buzzer off: {response_off}'}), 500
+
+        return jsonify({
+            'success': True, 
+            'message': 'Motion detected, buzzer triggered for 1 second'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 
 @app.route('/api/control/buzzer', methods=['POST'])
 def control_buzzer():
@@ -152,30 +183,6 @@ def control_servo():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
-@app.route('/api/control/stepper', methods=['POST'])
-def control_stepper():
-    if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
-
-    try:
-        data = request.json
-        steps = data.get('steps', 0)
-
-        # Send command to Arduino via socket
-        command = None
-        if steps > 0:
-            command = b'Silnik_ruch\n'
-        elif steps < 0:
-            command = b'Silnik_lewo\n'
-
-        if command:
-            success, response = send_command_to_serial(command)
-            if not success:
-                return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
-
-        return jsonify({'success': True, 'message': f'Stepper moved {steps} steps'})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 if __name__ == '__main__':
