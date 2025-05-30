@@ -637,11 +637,32 @@
                         <div class="current-value">Aktualny kąt: <span id="current-servo-angle">90°</span></div>
                     </div>
 
-
                     <div class="button-group">
                         <button class="control-btn" data-servo="0">Serwo 0°</button>
                         <button class="control-btn active" data-servo="90">Serwo 90°</button>
                         <button class="control-btn" data-servo="180">Serwo 180°</button>
+                    </div>
+
+                    <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
+
+                    <div class="slider-control">
+                        <label>Silnik Krokowy 28BYJ-48 (Prędkość)</label>
+                        <div class="slider-container">
+                            <span class="slider-value">0 RPM</span>
+                            <div class="slider" id="stepper-slider">
+                                <div class="slider-fill"></div>
+                                <div class="slider-thumb"></div>
+                            </div>
+                            <span class="slider-value">15 RPM</span>
+                        </div>
+                        <div class="current-value">Aktualna prędkość: <span id="current-stepper-speed">0 RPM</span></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="control-btn active" data-stepper="0">Stop</button>
+                        <button class="control-btn" data-stepper="5">Wolno (5 RPM)</button>
+                        <button class="control-btn" data-stepper="10">Średnio (10 RPM)</button>
+                        <button class="control-btn" data-stepper="15">Szybko (15 RPM)</button>
                     </div>
 
                     <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
@@ -754,7 +775,8 @@
         buzzerOn: false,
         securityActive: true,
         lastMotionTime: "Brak detekcji",
-        previousMotionState: false
+        previousMotionState: false,
+        stepperSpeed: 0
     };
 
     // Loading overlay functions
@@ -934,6 +956,52 @@
         }
     }
 
+    // Function to control stepper motor
+    async function controlStepper(speed) {
+        showLoading();
+
+        try {
+            const response = await fetch('/api/control/stepper', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({speed})
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            deviceState.stepperSpeed = speed;
+            document.getElementById('current-stepper-speed').textContent = `${speed} RPM`;
+
+            // Update slider position
+            const slider = document.getElementById('stepper-slider');
+            const fill = slider.querySelector('.slider-fill');
+            const thumb = slider.querySelector('.slider-thumb');
+            const percentage = (speed / 15) * 100;
+
+            fill.style.width = `${percentage}%`;
+            thumb.style.left = `${percentage}%`;
+
+            // Update button states
+            document.querySelectorAll('[data-stepper]').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.stepper) === speed);
+            });
+
+            showNotification(`Prędkość silnika krokowego: ${speed} RPM`);
+            return true;
+
+        } catch (error) {
+            console.error("Failed to control stepper:", error);
+            showNotification("Błąd podczas sterowania silnikiem krokowym", true);
+            return false;
+        } finally {
+            hideLoading();
+        }
+    }
 
     // Function to control buzzer
     async function controlBuzzer(state) {
@@ -1106,6 +1174,11 @@
             controlServo(value);
         });
 
+        // Stepper slider
+        const stepperSlider = document.getElementById('stepper-slider');
+        initializeSlider(stepperSlider, 0, 15, deviceState.stepperSpeed, (value) => {
+            controlStepper(value);
+        });
     }
 
     // Helper function to initialize a slider
@@ -1182,6 +1255,13 @@
         button.addEventListener('click', () => {
             const angle = parseInt(button.dataset.servo);
             controlServo(angle);
+        });
+    });
+
+    document.querySelectorAll('[data-stepper]').forEach(button => {
+        button.addEventListener('click', () => {
+            const speed = parseInt(button.dataset.stepper);
+            controlStepper(speed);
         });
     });
 

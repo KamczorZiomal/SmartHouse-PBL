@@ -183,6 +183,28 @@ def control_servo():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 
+@app.route('/api/control/stepper', methods=['POST'])
+def control_stepper():
+    if not serial_available:
+        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+
+    try:
+        data = request.json
+        speed = data.get('speed', 0)
+
+        # Ensure speed is within valid range (0-15 RPM for 28BYJ-48)
+        speed = max(0, min(15, speed))
+
+        # Send command to Arduino via socket
+        command = f'STEPPER_{speed}\n'.encode()
+        success, response = send_command_to_serial(command)
+
+        if not success:
+            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+
+        return jsonify({'success': True, 'message': f'Stepper speed set to {speed} RPM'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 if __name__ == '__main__':

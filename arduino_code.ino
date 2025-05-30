@@ -424,6 +424,45 @@ void setup() {
 }
 
 void loop() {
+  // Handle serial commands
+  if (Serial.available() > 0) {
+    String command = Serial.readStringUntil('\n');
+    command.trim();
+    
+    // Handle servo commands: SG90_<angle>
+    if (command.startsWith("SG90_")) {
+      int angle = command.substring(5).toInt();
+      angle = constrain(angle, 0, 180);
+      sg90.write(angle);
+      Serial.print("Servo set to: ");
+      Serial.println(angle);
+    }
+    // Handle stepper commands: STEPPER_<speed>
+    else if (command.startsWith("STEPPER_")) {
+      int speed = command.substring(8).toInt();
+      speed = constrain(speed, 0, 15); // Limit to 0-15 RPM for 28BYJ-48
+      stepper.setSpeed(speed);
+      
+      // If speed > 0, make the motor do one step to show it's working
+      if (speed > 0) {
+        stepper.step(10); // Small step to show movement
+      }
+      
+      Serial.print("Stepper speed set to: ");
+      Serial.print(speed);
+      Serial.println(" RPM");
+    }
+    // Handle buzzer commands
+    else if (command == "BUZZER_ON") {
+      digitalWrite(BUZZER_PIN, HIGH);
+      Serial.println("Buzzer ON");
+    }
+    else if (command == "BUZZER_OFF") {
+      digitalWrite(BUZZER_PIN, LOW);
+      Serial.println("Buzzer OFF");
+    }
+  }
+  
   // Odczyt danych ze wszystkich czujników
   readSensors();
 
