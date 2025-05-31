@@ -20,8 +20,8 @@
 #define IN3 32
 #define IN4 33
 
-// Pin for LED strip control
-#define LED_STRIP_PIN 8  // Pin for controlling the LED strip
+// Pin for LED control
+#define LED_PIN 22  // Changed from LED_STRIP_PIN to LED_PIN and updated to pin 22
 
 // Parametry wyświetlacza OLED - musimy je ustawić dla poprawnej inicjalizacji
 #define SCREEN_WIDTH 128      // Szerokość wyświetlacza w pikselach
@@ -42,8 +42,8 @@ Servo sg90;                         // Serwo SG90
 const int STEPS_PER_REV = 2048;     // Silnik krokowy 28BYJ-48 ma 2048 kroków na pełny obrót (z przekładnią)
 Stepper stepper(STEPS_PER_REV, IN1, IN2, IN3, IN4);
 
-// LED strip state
-bool ledStripOn = false;  // Current state of the LED strip
+// LED state
+bool ledOn = false;  // Current state of the LED
 
 // Definicje zmiennych globalnych - tutaj przechowujemy wartości odczytów z czujników
 float temperature = 0.0;    // Temperatura w stopniach Celsjusza
@@ -391,9 +391,9 @@ void setup() {
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
-  // Configure LED strip pin as output
-  pinMode(LED_STRIP_PIN, OUTPUT);
-  digitalWrite(LED_STRIP_PIN, LOW);  // Start with LED strip off
+  // Configure LED pin as output
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);  // Start with LED off
 
   // Inicjalizacja wyświetlacza OLED
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -462,16 +462,27 @@ void loop() {
       Serial.print(speed);
       Serial.println(" RPM");
     }
-    // Handle LED strip commands
+    // Handle new stepper commands for rotation
+    else if (command == "Silnik_ruch") {
+      stepper.setSpeed(10); // Set a fixed speed of 10 RPM
+      stepper.step(500);    // Rotate 500 steps clockwise
+      Serial.println("Stepper rotated 500 steps clockwise");
+    }
+    else if (command == "Silnik_lewo") {
+      stepper.setSpeed(10); // Set a fixed speed of 10 RPM
+      stepper.step(-500);   // Rotate 500 steps counterclockwise
+      Serial.println("Stepper rotated 500 steps counterclockwise");
+    }
+    // Handle LED commands
     else if (command == "LED_ON") {
-      digitalWrite(LED_STRIP_PIN, HIGH);
-      ledStripOn = true;
-      Serial.println("LED strip turned ON");
+      digitalWrite(LED_PIN, HIGH);
+      ledOn = true;
+      Serial.println("LED turned ON");
     }
     else if (command == "LED_OFF") {
-      digitalWrite(LED_STRIP_PIN, LOW);
-      ledStripOn = false;
-      Serial.println("LED strip turned OFF");
+      digitalWrite(LED_PIN, LOW);
+      ledOn = false;
+      Serial.println("LED turned OFF");
     }
     // Handle buzzer commands
     else if (command == "BUZZER_ON") {

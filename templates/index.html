@@ -645,33 +645,28 @@
 
                     <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
 
-                    <div class="slider-control">
-                        <label>Silnik Krokowy 28BYJ-48 (Prędkość)</label>
-                        <div class="slider-container">
-                            <span class="slider-value">0 RPM</span>
-                            <div class="slider" id="stepper-slider">
-                                <div class="slider-fill"></div>
-                                <div class="slider-thumb"></div>
-                            </div>
-                            <span class="slider-value">15 RPM</span>
-                        </div>
-                        <div class="current-value">Aktualna prędkość: <span id="current-stepper-speed">0 RPM</span></div>
-                    </div>
+                    <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-rotate" style="color: var(--primary);"></i> Kontrola Silnika Krokowego</h3>
 
                     <div class="button-group">
-                        <button class="control-btn active" data-stepper="0">Stop</button>
-                        <button class="control-btn" data-stepper="5">Wolno (5 RPM)</button>
-                        <button class="control-btn" data-stepper="10">Średnio (10 RPM)</button>
-                        <button class="control-btn" data-stepper="15">Szybko (15 RPM)</button>
+                        <button class="control-btn" id="stepper-clockwise">
+                            <i class="fa-solid fa-rotate-right"></i> Obrót w prawo (500 kroków)
+                        </button>
+                        <button class="control-btn" id="stepper-counterclockwise">
+                            <i class="fa-solid fa-rotate-left"></i> Obrót w lewo (500 kroków)
+                        </button>
                     </div>
 
                     <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
 
-                    <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-lightbulb" style="color: var(--primary);"></i> Kontrola Taśmy LED</h3>
+                    <h3 style="margin-bottom: 15px; color: black;"><i class="fa-solid fa-lightbulb" style="color: var(--primary);"></i> Kontrola LED</h3>
 
                     <div class="button-group">
-                        <button class="control-btn" id="led-on">Włącz Światło</button>
-                        <button class="control-btn active" id="led-off">Wyłącz Światło</button>
+                        <button class="control-btn" id="led-on">
+                            <i class="fa-solid fa-power-off"></i> Włącz LED
+                        </button>
+                        <button class="control-btn active" id="led-off">
+                            <i class="fa-solid fa-power-off" style="transform: rotate(180deg);"></i> Wyłącz LED
+                        </button>
                     </div>
 
                     <hr style="margin: 25px 0; border: 0; height: 1px; background-color: var(--light-gray);">
@@ -965,52 +960,36 @@
         }
     }
 
-    // Function to control stepper motor
-    async function controlStepper(speed) {
-        showLoading();
+    // Stepper motor control
+    const stepperClockwiseBtn = document.getElementById('stepper-clockwise');
+    const stepperCounterclockwiseBtn = document.getElementById('stepper-counterclockwise');
 
+    async function controlStepper(direction) {
+        showLoading();
         try {
             const response = await fetch('/api/control/stepper', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({speed})
+                body: JSON.stringify({ direction: direction })
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            if (data.success) {
+                showNotification(data.message);
+            } else {
+                showNotification(data.message || 'Błąd sterowania silnikiem', 'error');
             }
-
-            const result = await response.json();
-            deviceState.stepperSpeed = speed;
-            document.getElementById('current-stepper-speed').textContent = `${speed} RPM`;
-
-            // Update slider position
-            const slider = document.getElementById('stepper-slider');
-            const fill = slider.querySelector('.slider-fill');
-            const thumb = slider.querySelector('.slider-thumb');
-            const percentage = (speed / 15) * 100;
-
-            fill.style.width = `${percentage}%`;
-            thumb.style.left = `${percentage}%`;
-
-            // Update button states
-            document.querySelectorAll('[data-stepper]').forEach(btn => {
-                btn.classList.toggle('active', parseInt(btn.dataset.stepper) === speed);
-            });
-
-            showNotification(`Prędkość silnika krokowego: ${speed} RPM`);
-            return true;
-
         } catch (error) {
-            console.error("Failed to control stepper:", error);
-            showNotification("Błąd podczas sterowania silnikiem krokowym", true);
-            return false;
+            console.error('Error:', error);
+            showNotification('Błąd komunikacji z serwerem', 'error');
         } finally {
             hideLoading();
         }
     }
+
+    stepperClockwiseBtn.addEventListener('click', () => controlStepper('clockwise'));
+    stepperCounterclockwiseBtn.addEventListener('click', () => controlStepper('counterclockwise'));
 
     // Function to control buzzer
     async function controlBuzzer(state) {
@@ -1267,13 +1246,6 @@
         });
     });
 
-    document.querySelectorAll('[data-stepper]').forEach(button => {
-        button.addEventListener('click', () => {
-            const speed = parseInt(button.dataset.stepper);
-            controlStepper(speed);
-        });
-    });
-
     document.getElementById('buzzer-on').addEventListener('click', () => {
         controlBuzzer(true);
     });
@@ -1282,38 +1254,12 @@
         controlBuzzer(false);
     });
 
-    // Stepper motor control
-    document.querySelectorAll('.control-btn[data-stepper]').forEach(button => {
-        button.addEventListener('click', async function() {
-            const rpm = this.dataset.stepper;
-            const buttons = this.parentElement.querySelectorAll('.control-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-
-            try {
-                const response = await fetch('/api/control/stepper', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ rpm: parseInt(rpm) })
-                });
-                const data = await response.json();
-                if (!data.success) {
-                    showNotification(data.message || 'Błąd sterowania silnikiem', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Błąd komunikacji z serwerem', 'error');
-            }
-        });
-    });
-
-    // LED strip control
+    // LED control
     const ledOnBtn = document.getElementById('led-on');
     const ledOffBtn = document.getElementById('led-off');
 
     async function controlLed(state) {
+        showLoading();
         try {
             const response = await fetch('/api/control/led', {
                 method: 'POST',
@@ -1331,12 +1277,15 @@
                     ledOnBtn.classList.remove('active');
                     ledOffBtn.classList.add('active');
                 }
+                showNotification(data.message);
             } else {
-                showNotification(data.message || 'Błąd sterowania taśmą LED', 'error');
+                showNotification(data.message || 'Błąd sterowania LED', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
             showNotification('Błąd komunikacji z serwerem', 'error');
+        } finally {
+            hideLoading();
         }
     }
 

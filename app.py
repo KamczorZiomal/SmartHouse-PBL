@@ -190,19 +190,22 @@ def control_stepper():
 
     try:
         data = request.json
-        speed = data.get('speed', 0)
+        direction = data.get('direction')  # 'clockwise' or 'counterclockwise'
 
-        # Ensure speed is within valid range (0-15 RPM for 28BYJ-48)
-        speed = max(0, min(15, speed))
+        if direction not in ['clockwise', 'counterclockwise']:
+            return jsonify({'success': False, 'message': 'Invalid direction specified'}), 400
 
         # Send command to Arduino via socket
-        command = f'STEPPER_{speed}\n'.encode()
+        command = b'Silnik_ruch\n' if direction == 'clockwise' else b'Silnik_lewo\n'
         success, response = send_command_to_serial(command)
 
         if not success:
             return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
 
-        return jsonify({'success': True, 'message': f'Stepper speed set to {speed} RPM'})
+        return jsonify({
+            'success': True, 
+            'message': f'Stepper rotated 500 steps {"clockwise" if direction == "clockwise" else "counterclockwise"}'
+        })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
