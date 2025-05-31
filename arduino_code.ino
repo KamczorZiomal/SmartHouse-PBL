@@ -68,6 +68,9 @@ const unsigned long debounceTime = 500;     // Czas debouncingu w milisekundach 
 const unsigned long displayUpdateInterval = 1000; // Aktualizacja wyświetlacza co 1 sekundę
 const unsigned long motionResetTime = 3000; // Czas resetowania stanu ruchu (3 sekundy)
 
+// Add at the top with other global variables
+bool motionMonitoringEnabled = true;  // Default to enabled
+
 // Funkcja obliczająca różnicę czasu z uwzględnieniem przepełnienia licznika millis()
 // Jest to ważne, bo millis() wraca do zera po około 50 dniach ciągłej pracy
 unsigned long getTimeDifference(unsigned long currentTime, unsigned long previousTime) {
@@ -281,6 +284,22 @@ int calculateLightPercent() {
 // Funkcja do odczytu wszystkich czujników
 // Zbiera dane ze wszystkich podłączonych sensorów
 void readSensors() {
+  readTemperatureHumidity();
+  readAirQuality();
+  readLightLevel();
+  readMotionSensor();
+}
+
+// Add new function for motion sensor reading
+void readMotionSensor() {
+  motionDetected = (digitalRead(PIR_PIN) == HIGH);
+  if (motionDetected) {
+    lastMotionTime = millis();
+  }
+}
+
+// Add new function for other sensor reading
+void readTemperatureHumidity() {
   // Odczyt DHT22 - temperatura i wilgotność
   float newTemp = dht.readTemperature();
   float newHumidity = dht.readHumidity();
@@ -305,7 +324,9 @@ void readSensors() {
       // Serial.println(F("Powtarzające się błędy DHT - sprawdź okablowanie i czy czujnik działa poprawnie"));
     }
   }
+}
 
+void readAirQuality() {
   // Odczyt MQ135 z uśrednianiem - pomaga wyeliminować szumy pomiarowe
   int analogMQ = 0;
   for (int i = 0; i < 5; i++) {
@@ -317,15 +338,14 @@ void readSensors() {
   // Przeliczanie na ppm - wartość proporcjonalna do zanieczyszczenia
   // W rzeczywistości wymagałoby to dokładniejszej kalibracji dla konkretnych gazów
   airQuality = analogMQ * 0.1;
+}
 
+void readLightLevel() {
   // Odczyt BH1750 - czujnik natężenia światła w luksach
   float lux = lightMeter.readLightLevel();
   if (lux >= 0 && lux < 65535) {  // Sprawdzenie czy odczyt jest sensowny
     lightLevel = lux;
   }
-
-  // Odczyt czujnika ruchu PIR
-  readMotion();
 }
 
 // Funkcja do aktualizacji wyświetlacza - wszystkie pomiary
@@ -439,12 +459,21 @@ void loop() {
     String command = Serial.readStringUntil('\n');
     command.trim();
     
-    // Handle servo commands: SG90_<angle>
-    if (command.startsWith("SG90_")) {
+    // Handle motion monitoring commands
+    if (command == "MOTION_ON") {
+      motionMonitoringEnabled = true;
+      Serial.println("Monitoring ruchu WŁĄCZONY");
+    }
+    else if (command == "MOTION_OFF") {
+      motionMonitoringEnabled = false;
+      Serial.println("Monitoring ruchu WYŁĄCZONY");
+    }
+    // Handle other existing commands
+    else if (command.startsWith("SG90_")) {
       int angle = command.substring(5).toInt();
       angle = constrain(angle, 0, 180);
       sg90.write(angle);
-      Serial.print("Servo set to: ");
+      Serial.print("Serwo ustawione na: ");
       Serial.println(angle);
     }
     // Handle stepper commands: STEPPER_<speed>
@@ -458,7 +487,7 @@ void loop() {
         stepper.step(10); // Small step to show movement
       }
       
-      Serial.print("Stepper speed set to: ");
+      Serial.print("Prędkość silnika ustawiona na: ");
       Serial.print(speed);
       Serial.println(" RPM");
     }
@@ -466,40 +495,47 @@ void loop() {
     else if (command == "Silnik_ruch") {
       stepper.setSpeed(10); // Set a fixed speed of 10 RPM
       stepper.step(500);    // Rotate 500 steps clockwise
-      Serial.println("Stepper rotated 500 steps clockwise");
+      Serial.println("Silnik obrócony o 500 kroków zgodnie z ruchem wskazówek zegara");
     }
     else if (command == "Silnik_lewo") {
       stepper.setSpeed(10); // Set a fixed speed of 10 RPM
       stepper.step(-500);   // Rotate 500 steps counterclockwise
-      Serial.println("Stepper rotated 500 steps counterclockwise");
+      Serial.println("Silnik obrócony o 500 kroków przeciwnie do ruchu wskazówek zegara");
     }
     // Handle LED commands
     else if (command == "LED_ON") {
       digitalWrite(LED_PIN, HIGH);
       ledOn = true;
-      Serial.println("LED turned ON");
+      Serial.println("LED WŁĄCZONY");
     }
     else if (command == "LED_OFF") {
       digitalWrite(LED_PIN, LOW);
       ledOn = false;
-      Serial.println("LED turned OFF");
+      Serial.println("LED WYŁĄCZONY");
     }
     // Handle buzzer commands
     else if (command == "BUZZER_ON") {
       digitalWrite(BUZZER_PIN, HIGH);
-      Serial.println("Buzzer ON");
+      Serial.println("Buzzer WŁĄCZONY");
     }
     else if (command == "BUZZER_OFF") {
       digitalWrite(BUZZER_PIN, LOW);
-      Serial.println("Buzzer OFF");
+      Serial.println("Buzzer WYŁĄCZONY");
     }
   }
   
-  // Odczyt danych ze wszystkich czujników
-  readSensors();
-
-  // Sprawdzanie warunków alarmu (bez włączania dźwięku)
-  checkAlarmConditions();
+  // Only read motion sensor if monitoring is enabled
+  if (motionMonitoringEnabled) {
+    readSensors();
+    checkAlarmConditions();
+  } else {
+    // Still read other sensors even when motion monitoring is off
+    readTemperatureHumidity();
+    readAirQuality();
+    readLightLevel();
+    // Skip motion sensor reading and alarm checks
+    motionDetected = false;
+  }
 
   // Aktualizacja wyświetlacza - wykonujemy co określony czas dla płynności
   unsigned long currentTime = millis();

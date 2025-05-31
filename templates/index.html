@@ -649,10 +649,10 @@
 
                     <div class="button-group">
                         <button class="control-btn" id="stepper-clockwise">
-                            <i class="fa-solid fa-rotate-right"></i> Obrót w prawo (500 kroków)
+                            <i class="fa-solid fa-rotate-right"></i> Obrót w prawo 
                         </button>
                         <button class="control-btn" id="stepper-counterclockwise">
-                            <i class="fa-solid fa-rotate-left"></i> Obrót w lewo (500 kroków)
+                            <i class="fa-solid fa-rotate-left"></i> Obrót w lewo
                         </button>
                     </div>
 
@@ -688,6 +688,15 @@
                     <div class="status-indicator">
                         <div class="indicator active" id="security-status"></div>
                         <span id="security-status-text">System aktywny</span>
+                    </div>
+
+                    <div class="button-group" style="margin: 15px 0;">
+                        <button class="control-btn active" id="motion-on">
+                            <i class="fa-solid fa-person-walking"></i> Włącz Monitoring Ruchu
+                        </button>
+                        <button class="control-btn" id="motion-off">
+                            <i class="fa-solid fa-person-walking" style="opacity: 0.5;"></i> Wyłącz Monitoring Ruchu
+                        </button>
                     </div>
 
                     <div class="alert-panel" id="motion-alert">
@@ -773,7 +782,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
-    // Global variables for device state
+    // Zmienne globalne dla stanu urządzeń
     const deviceState = {
         servoAngle: 90,
         buzzerOn: false,
@@ -783,7 +792,7 @@
         stepperSpeed: 0
     };
 
-    // Loading overlay functions
+    // Funkcje nakładki ładowania
     function showLoading() {
         document.querySelector('.loading-overlay').classList.add('active');
     }
@@ -792,7 +801,7 @@
         document.querySelector('.loading-overlay').classList.remove('active');
     }
 
-    // Function to show notifications
+    // Funkcja do wyświetlania powiadomień
     function showNotification(message, isError = false) {
         const successMsg = document.getElementById('success-message');
         const errorMsg = document.getElementById('error-message');
@@ -808,7 +817,7 @@
         }
     }
 
-    // Function to fetch sensor data from the database
+    // Funkcja do pobierania danych z czujników z bazy danych
     async function fetchSensorData() {
         showLoading();
 
@@ -816,7 +825,7 @@
             const response = await fetch('/api/data');
 
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`Błąd HTTP! Status: ${response.status}`);
             }
 
             const data = await response.json();
@@ -824,10 +833,10 @@
             return true;
 
         } catch (error) {
-            console.error("Failed to fetch sensor data:", error);
+            console.error("Nie udało się pobrać danych z czujników:", error);
             showNotification("Nie udało się pobrać danych z czujników. Używam danych testowych.", true);
 
-            // Use sample data for demo/testing
+            // Użyj przykładowych danych do demonstracji/testów
             const currentTime = new Date().toISOString().replace('T', ' ').substring(0, 19);
             const fiveMinAgo = new Date(Date.now() - 5 * 60000).toISOString().replace('T', ' ').substring(0, 19);
 
@@ -859,7 +868,7 @@
         }
     }
 
-    // Update the sensor display with fetched data
+    // Aktualizacja wyświetlania danych z czujników
     function updateSensorDisplay(data) {
         if (!data || !data.latest) {
             showNotification("Otrzymano nieprawidłowe dane z czujników", true);
@@ -869,13 +878,13 @@
         const latestData = data.latest;
         const oldestData = data.oldest || null;
 
-        // Update values
+        // Aktualizacja wartości
         document.getElementById('temperature-value').textContent = `${latestData.temperature}°C`;
         document.getElementById('humidity-value').textContent = `${latestData.humidity}%`;
         document.getElementById('air-quality-value').textContent = `${latestData.air_quality}%`;
         document.getElementById('light-value').textContent = `${latestData.light_percent}%`;
 
-        // Update trends if we have older data for comparison
+        // Aktualizacja trendów jeśli mamy starsze dane do porównania
         if (oldestData) {
             updateTrend(latestData.temperature, oldestData.temperature, document.getElementById('temperature-trend'));
             updateTrend(latestData.humidity, oldestData.humidity, document.getElementById('humidity-trend'));
@@ -888,13 +897,13 @@
             document.getElementById('light-trend').textContent = 'Brak danych do porównania';
         }
 
-        // Update last updated time
+        // Aktualizacja czasu ostatniej aktualizacji
         const timestamp = new Date(latestData.timestamp);
         const timeStr = timestamp.toLocaleTimeString();
         document.getElementById('security-status-text').textContent = `System aktywny (ostatnia aktualizacja: ${timeStr})`;
     }
 
-    // Helper function to update trend indicators
+    // Funkcja pomocnicza do aktualizacji wskaźników trendu
     function updateTrend(currentValue, previousValue, trendElement) {
         const difference = (currentValue - previousValue).toFixed(1);
         const absDifference = Math.abs(difference).toFixed(1);
@@ -913,7 +922,7 @@
         }
     }
 
-    // Function to control servo motor
+    // Funkcja do sterowania serwomechanizmem
     async function controlServo(angle) {
         showLoading();
 
@@ -927,14 +936,14 @@
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`Błąd HTTP! Status: ${response.status}`);
             }
 
             const result = await response.json();
             deviceState.servoAngle = angle;
             document.getElementById('current-servo-angle').textContent = `${angle}°`;
 
-            // Update slider position
+            // Aktualizacja pozycji suwaka
             const slider = document.getElementById('servo-slider');
             const fill = slider.querySelector('.slider-fill');
             const thumb = slider.querySelector('.slider-thumb');
@@ -943,16 +952,16 @@
             fill.style.width = `${percentage}%`;
             thumb.style.left = `${percentage}%`;
 
-            // Update button states
+            // Aktualizacja stanu przycisków
             document.querySelectorAll('[data-servo]').forEach(btn => {
                 btn.classList.toggle('active', parseInt(btn.dataset.servo) === angle);
             });
 
-            showNotification(`Servo ustawiono na ${angle}°`);
+            showNotification(`Serwo ustawione na ${angle}°`);
             return true;
 
         } catch (error) {
-            console.error("Failed to control servo:", error);
+            console.error("Nie udało się sterować serwomechanizmem:", error);
             showNotification("Błąd podczas sterowania serwomechanizmem", true);
             return false;
         } finally {
@@ -960,7 +969,7 @@
         }
     }
 
-    // Stepper motor control
+    // Sterowanie silnikiem krokowym
     const stepperClockwiseBtn = document.getElementById('stepper-clockwise');
     const stepperCounterclockwiseBtn = document.getElementById('stepper-counterclockwise');
 
@@ -981,7 +990,7 @@
                 showNotification(data.message || 'Błąd sterowania silnikiem', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Błąd:', error);
             showNotification('Błąd komunikacji z serwerem', 'error');
         } finally {
             hideLoading();
@@ -991,7 +1000,7 @@
     stepperClockwiseBtn.addEventListener('click', () => controlStepper('clockwise'));
     stepperCounterclockwiseBtn.addEventListener('click', () => controlStepper('counterclockwise'));
 
-    // Function to control buzzer
+    // Funkcja do sterowania buzzerem
     async function controlBuzzer(state) {
         showLoading();
 
@@ -1005,13 +1014,13 @@
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`Błąd HTTP! Status: ${response.status}`);
             }
 
             const result = await response.json();
             deviceState.buzzerOn = state;
 
-            // Update button states
+            // Aktualizacja stanu przycisków
             document.getElementById('buzzer-on').classList.toggle('active', state);
             document.getElementById('buzzer-off').classList.toggle('active', !state);
 
@@ -1019,7 +1028,7 @@
             return true;
 
         } catch (error) {
-            console.error("Failed to control buzzer:", error);
+            console.error("Nie udało się sterować buzzerem:", error);
             showNotification("Błąd podczas sterowania buzzerem", true);
             return false;
         } finally {
@@ -1027,29 +1036,29 @@
         }
     }
 
-    // Function to detect motion
+    // Funkcja do wykrywania ruchu
     async function checkMotion() {
         try {
             const response = await fetch('/api/sensors/motion');
 
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`Błąd HTTP! Status: ${response.status}`);
             }
 
             const data = await response.json();
 
-            // Check if motion was just detected (current state is true)
+            // Sprawdź czy ruch został właśnie wykryty (aktualny stan to true)
             if (data.motion_detected) {
-                // Update UI to show motion detected
+                // Aktualizacja interfejsu aby pokazać wykryty ruch
                 document.getElementById('motion-alert').classList.add('active');
                 deviceState.lastMotionTime = data.timestamp || new Date().toLocaleString();
                 document.getElementById('last-motion-time').textContent = `Ostatnia detekcja: ${deviceState.lastMotionTime}`;
 
-                // Check if this is a new motion detection (previous state was false)
+                // Sprawdź czy to nowe wykrycie ruchu (poprzedni stan był false)
                 if (!deviceState.previousMotionState) {
-                    console.log("New motion detected! Triggering buzzer for 1 second");
+                    console.log("Wykryto nowy ruch! Uruchamianie buzzera na 1 sekundę");
 
-                    // Call the new endpoint to trigger the buzzer for 1 second
+                    // Wywołaj nowy endpoint aby uruchomić buzzer na 1 sekundę
                     try {
                         const buzzerResponse = await fetch('/api/motion/detected', {
                             method: 'POST',
@@ -1060,30 +1069,30 @@
                         });
 
                         if (!buzzerResponse.ok) {
-                            console.error("Failed to trigger buzzer:", buzzerResponse.statusText);
+                            console.error("Nie udało się uruchomić buzzera:", buzzerResponse.statusText);
                         }
                     } catch (buzzerError) {
-                        console.error("Error triggering buzzer:", buzzerError);
+                        console.error("Błąd uruchamiania buzzera:", buzzerError);
                     }
                 }
             } else {
                 document.getElementById('motion-alert').classList.remove('active');
             }
 
-            // Store current motion state for next comparison
+            // Zapisz aktualny stan ruchu do następnego porównania
             deviceState.previousMotionState = data.motion_detected;
 
             updateMotionChart(data.motion_history || generateSampleMotionData());
 
         } catch (error) {
-            console.error("Failed to check motion:", error);
-            // Use sample data for testing
+            console.error("Nie udało się sprawdzić ruchu:", error);
+            // Użyj przykładowych danych do testów
             const sampleData = generateSampleMotionData();
             updateMotionChart(sampleData);
         }
     }
 
-    // Generate sample motion data for demo/testing
+    // Generuj przykładowe dane ruchu do demonstracji/testów
     function generateSampleMotionData() {
         const data = [];
         const now = new Date();
@@ -1094,23 +1103,23 @@
 
             data.push({
                 time: time.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
-                value: Math.random() > 0.7 ? 1 : 0  // 30% chance of motion detection
+                value: Math.random() > 0.7 ? 1 : 0  // 30% szans na wykrycie ruchu
             });
         }
 
         return data.reverse();
     }
 
-    // Update motion detection chart
+    // Aktualizacja wykresu wykrywania ruchu
     function updateMotionChart(data) {
         const ctx = document.getElementById('motion-chart');
 
-        // Destroy existing chart if it exists
+        // Zniszcz istniejący wykres jeśli istnieje
         if (window.motionChart) {
             window.motionChart.destroy();
         }
 
-        // Create new chart
+        // Utwórz nowy wykres
         window.motionChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -1154,33 +1163,33 @@
         });
     }
 
-    // Initialize sliders
+    // Inicjalizacja suwaków
     function initializeSliders() {
-        // Servo slider
+        // Suwak serwa
         const servoSlider = document.getElementById('servo-slider');
         initializeSlider(servoSlider, 0, 180, deviceState.servoAngle, (value) => {
             controlServo(value);
         });
 
-        // Stepper slider
+        // Suwak silnika krokowego
         const stepperSlider = document.getElementById('stepper-slider');
         initializeSlider(stepperSlider, 0, 15, deviceState.stepperSpeed, (value) => {
             controlStepper(value);
         });
     }
 
-    // Helper function to initialize a slider
+    // Funkcja pomocnicza do inicjalizacji suwaka
     function initializeSlider(slider, min, max, initialValue, onChangeCallback) {
         const fill = slider.querySelector('.slider-fill');
         const thumb = slider.querySelector('.slider-thumb');
         const range = max - min;
 
-        // Initialize position
+        // Inicjalizacja pozycji
         const initialPercentage = ((initialValue - min) / range) * 100;
         fill.style.width = `${initialPercentage}%`;
         thumb.style.left = `${initialPercentage}%`;
 
-        // Add drag functionality
+        // Dodaj funkcjonalność przeciągania
         let isDragging = false;
 
         thumb.addEventListener('mousedown', () => {
@@ -1210,35 +1219,35 @@
             fill.style.width = `${percentage}%`;
             thumb.style.left = `${percentage}%`;
 
-            // Calculate value based on percentage
+            // Oblicz wartość na podstawie procentu
             const value = Math.round(min + (percentage / 100) * range);
             onChangeCallback(value);
         }
     }
 
-    // Navigation functionality
+    // Funkcjonalność nawigacji
     document.querySelectorAll('.nav-link').forEach(navLink => {
         navLink.addEventListener('click', () => {
-            // Remove active class from all nav links
+            // Usuń klasę active ze wszystkich linków nawigacji
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
             });
 
-            // Add active class to clicked nav link
+            // Dodaj klasę active do klikniętego linku nawigacji
             navLink.classList.add('active');
 
-            // Hide all sections
+            // Ukryj wszystkie sekcje
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
 
-            // Show the corresponding section
+            // Pokaż odpowiednią sekcję
             const sectionId = navLink.getAttribute('data-section');
             document.getElementById(sectionId).classList.add('active');
         });
     });
 
-    // Event listeners for control buttons
+    // Nasłuchiwacze zdarzeń dla przycisków sterowania
     document.querySelectorAll('[data-servo]').forEach(button => {
         button.addEventListener('click', () => {
             const angle = parseInt(button.dataset.servo);
@@ -1246,15 +1255,7 @@
         });
     });
 
-    document.getElementById('buzzer-on').addEventListener('click', () => {
-        controlBuzzer(true);
-    });
-
-    document.getElementById('buzzer-off').addEventListener('click', () => {
-        controlBuzzer(false);
-    });
-
-    // LED control
+    // Sterowanie LED
     const ledOnBtn = document.getElementById('led-on');
     const ledOffBtn = document.getElementById('led-off');
 
@@ -1282,43 +1283,82 @@
                 showNotification(data.message || 'Błąd sterowania LED', 'error');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Błąd:', error);
             showNotification('Błąd komunikacji z serwerem', 'error');
         } finally {
             hideLoading();
         }
     }
 
-    ledOnBtn.addEventListener('click', () => controlLed('on'));
-    ledOffBtn.addEventListener('click', () => controlLed('off'));
+    // Sterowanie monitoringiem ruchu
+    const motionOnBtn = document.getElementById('motion-on');
+    const motionOffBtn = document.getElementById('motion-off');
 
-    // Initialize application
+    async function controlMotion(state) {
+        showLoading();
+        try {
+            const response = await fetch('/api/control/motion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ state: state })
+            });
+            const data = await response.json();
+            if (data.success) {
+                if (state === 'on') {
+                    motionOnBtn.classList.add('active');
+                    motionOffBtn.classList.remove('active');
+                    document.getElementById('security-status').classList.add('active');
+                    document.getElementById('security-status-text').textContent = 'System aktywny';
+                } else {
+                    motionOnBtn.classList.remove('active');
+                    motionOffBtn.classList.add('active');
+                    document.getElementById('security-status').classList.remove('active');
+                    document.getElementById('security-status-text').textContent = 'System nieaktywny';
+                    // Wyczyść alert ruchu przy wyłączaniu
+                    document.getElementById('motion-alert').classList.remove('active');
+                    document.getElementById('last-motion-time').textContent = 'Ostatnia detekcja: --';
+                }
+                showNotification(data.message);
+            } else {
+                showNotification(data.message || 'Błąd sterowania monitoringiem ruchu', 'error');
+            }
+        } catch (error) {
+            console.error('Błąd:', error);
+            showNotification('Błąd komunikacji z serwerem', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Inicjalizacja aplikacji
     async function initialize() {
         showLoading();
 
         try {
-            // Fetch initial sensor data
+            // Pobierz początkowe dane z czujników
             await fetchSensorData();
 
-            // Initialize sliders
+            // Inicjalizuj suwaki
             initializeSliders();
 
-            // Check motion detection
+            // Sprawdź wykrywanie ruchu
             await checkMotion();
 
-            // Set up polling for sensor data and motion detection
-            setInterval(fetchSensorData, 30000);  // Every 30 seconds
-            setInterval(checkMotion, 5000);       // Every 5 seconds
+            // Ustaw odpytywanie o dane z czujników i wykrywanie ruchu
+            setInterval(fetchSensorData, 30000);  // Co 30 sekund
+            setInterval(checkMotion, 5000);       // Co 5 sekund
 
         } catch (error) {
-            console.error("Initialization error:", error);
+            console.error("Błąd inicjalizacji:", error);
             showNotification("Błąd podczas inicjalizacji aplikacji", true);
         } finally {
             hideLoading();
         }
     }
 
-    // Start the application when DOM is fully loaded
+    // Rozpocznij aplikację gdy DOM jest w pełni załadowany
     document.addEventListener('DOMContentLoaded', initialize);
 </script>
 </body>

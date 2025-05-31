@@ -6,11 +6,11 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sensors.db'
 db.init_app(app)
 
-# Socket client configuration for communicating with serial_reader.py
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
+# Konfiguracja klienta gniazda do komunikacji z serial_reader.py
+HOST = '127.0.0.1'  # Adres hosta serwera
+PORT = 65432        # Port używany przez serwer
 
-# Function to send commands to serial_reader.py via socket
+# Funkcja do wysyłania komend do serial_reader.py przez gniazdo
 def send_command_to_serial(command):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -19,21 +19,21 @@ def send_command_to_serial(command):
             response = s.recv(1024)
             return True, response.decode('utf-8')
     except Exception as e:
-        print(f"Error sending command to serial_reader.py: {e}")
+        print(f"Błąd wysyłania komendy do serial_reader.py: {e}")
         return False, str(e)
 
-# Check if serial_reader.py is available
+# Sprawdź czy serial_reader.py jest dostępny
 try:
     success, response = send_command_to_serial(b'CHECK_CONNECTION\n')
     if success and "Connection OK" in response:
         serial_available = True
-        print("Successfully connected to serial_reader.py")
+        print("Pomyślnie połączono z serial_reader.py")
     else:
         serial_available = False
-        print(f"Failed to connect to serial_reader.py: {response}")
+        print(f"Nie udało się połączyć z serial_reader.py: {response}")
 except Exception as e:
-    print(f"Error connecting to serial_reader.py: {e}")
-    print("Make sure serial_reader.py is running before starting app.py")
+    print(f"Błąd połączenia z serial_reader.py: {e}")
+    print("Upewnij się, że serial_reader.py jest uruchomiony przed startem app.py")
     serial_available = False
 
 
@@ -105,30 +105,30 @@ def get_motion():
 @app.route('/api/motion/detected', methods=['POST'])
 def motion_detected():
     """
-    Endpoint to handle motion detection events.
-    When motion is detected, this endpoint will trigger the buzzer for 1 second.
+    Endpoint do obsługi zdarzeń wykrycia ruchu.
+    Gdy wykryto ruch, ten endpoint uruchomi buzzer na 1 sekundę.
     """
     if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
 
     try:
-        # Turn buzzer on
+        # Włącz buzzer
         success_on, response_on = send_command_to_serial(b'BUZZER_ON\n')
         if not success_on:
-            return jsonify({'success': False, 'message': f'Failed to turn buzzer on: {response_on}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się włączyć buzzera: {response_on}'}), 500
 
-        # Wait for 1 second
+        # Poczekaj 1 sekundę
         import time
         time.sleep(1)
 
-        # Turn buzzer off
+        # Wyłącz buzzer
         success_off, response_off = send_command_to_serial(b'BUZZER_OFF\n')
         if not success_off:
-            return jsonify({'success': False, 'message': f'Failed to turn buzzer off: {response_off}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się wyłączyć buzzera: {response_off}'}), 500
 
         return jsonify({
             'success': True, 
-            'message': 'Motion detected, buzzer triggered for 1 second'
+            'message': 'Wykryto ruch, buzzer uruchomiony na 1 sekundę'
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -137,7 +137,7 @@ def motion_detected():
 @app.route('/api/control/buzzer', methods=['POST'])
 def control_buzzer():
     if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
 
     try:
         data = request.json
@@ -145,14 +145,14 @@ def control_buzzer():
 
         if state:
             command = b'BUZZER_ON\n'
-            message = 'Buzzer turned ON'
+            message = 'Buzzer WŁĄCZONY'
         else:
             command = b'BUZZER_OFF\n'
-            message = 'Buzzer turned OFF'
+            message = 'Buzzer WYŁĄCZONY'
 
         success, response = send_command_to_serial(command)
         if not success:
-            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się wysłać komendy: {response}'}), 500
 
         return jsonify({'success': True, 'message': message})
     except Exception as e:
@@ -162,23 +162,23 @@ def control_buzzer():
 @app.route('/api/control/servo', methods=['POST'])
 def control_servo():
     if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
 
     try:
         data = request.json
         angle = data.get('angle', 90)
 
-        # Ensure angle is within valid range
+        # Upewnij się, że kąt jest w prawidłowym zakresie
         angle = max(0, min(180, angle))
 
-        # Send command to Arduino via socket
+        # Wyślij komendę do Arduino przez gniazdo
         command = f'SG90_{angle}\n'.encode()
         success, response = send_command_to_serial(command)
 
         if not success:
-            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się wysłać komendy: {response}'}), 500
 
-        return jsonify({'success': True, 'message': f'Servo set to {angle} degrees'})
+        return jsonify({'success': True, 'message': f'Serwo ustawione na {angle} stopni'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
@@ -186,25 +186,25 @@ def control_servo():
 @app.route('/api/control/stepper', methods=['POST'])
 def control_stepper():
     if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
 
     try:
         data = request.json
-        direction = data.get('direction')  # 'clockwise' or 'counterclockwise'
+        direction = data.get('direction')  # 'clockwise' lub 'counterclockwise'
 
         if direction not in ['clockwise', 'counterclockwise']:
-            return jsonify({'success': False, 'message': 'Invalid direction specified'}), 400
+            return jsonify({'success': False, 'message': 'Nieprawidłowy kierunek obrotu'}), 400
 
-        # Send command to Arduino via socket
+        # Wyślij komendę do Arduino przez gniazdo
         command = b'Silnik_ruch\n' if direction == 'clockwise' else b'Silnik_lewo\n'
         success, response = send_command_to_serial(command)
 
         if not success:
-            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się wysłać komendy: {response}'}), 500
 
         return jsonify({
             'success': True, 
-            'message': f'Stepper rotated 500 steps {"clockwise" if direction == "clockwise" else "counterclockwise"}'
+            'message': f'Silnik obrócony o 500 kroków {"zgodnie z ruchem wskazówek zegara" if direction == "clockwise" else "przeciwnie do ruchu wskazówek zegara"}'
         })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
@@ -213,20 +213,47 @@ def control_stepper():
 @app.route('/api/control/led', methods=['POST'])
 def control_led():
     if not serial_available:
-        return jsonify({'success': False, 'message': 'Serial connection not available'}), 500
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
 
     try:
         data = request.json
-        state = data.get('state', False)
+        state = data.get('state', 'off')  # Domyślnie 'off' jeśli nie określono
 
-        # Send command to Arduino via socket
-        command = b'LED_ON\n' if state else b'LED_OFF\n'
+        # Konwersja stanu tekstowego na wartość logiczną
+        is_on = state.lower() == 'on'
+
+        # Wyślij komendę do Arduino przez gniazdo
+        command = b'LED_ON\n' if is_on else b'LED_OFF\n'
         success, response = send_command_to_serial(command)
 
         if not success:
-            return jsonify({'success': False, 'message': f'Failed to send command: {response}'}), 500
+            return jsonify({'success': False, 'message': f'Nie udało się wysłać komendy: {response}'}), 500
 
-        return jsonify({'success': True, 'message': f'LED strip turned {"ON" if state else "OFF"}'})
+        return jsonify({'success': True, 'message': f'LED {"WŁĄCZONY" if is_on else "WYŁĄCZONY"}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@app.route('/api/control/motion', methods=['POST'])
+def control_motion():
+    if not serial_available:
+        return jsonify({'success': False, 'message': 'Brak połączenia szeregowego'}), 500
+
+    try:
+        data = request.json
+        state = data.get('state', 'off')  # Domyślnie 'off' jeśli nie określono
+
+        # Konwersja stanu tekstowego na wartość logiczną
+        is_on = state.lower() == 'on'
+
+        # Wyślij komendę do Arduino przez gniazdo
+        command = b'MOTION_ON\n' if is_on else b'MOTION_OFF\n'
+        success, response = send_command_to_serial(command)
+
+        if not success:
+            return jsonify({'success': False, 'message': f'Nie udało się wysłać komendy: {response}'}), 500
+
+        return jsonify({'success': True, 'message': f'Monitoring ruchu {"WŁĄCZONY" if is_on else "WYŁĄCZONY"}'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
